@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+</head>
+<body>
+    <h1>Error</h1>
+    <p>Se ha producido un error en la aplicación:</p>
+    <p th:text="${errorMsg}"></p>
+    <p>Detalles del error:</p>
+    <p th:text="${errorCause}"></p>
+    <p>Estado: <span th:text="${status}"></span></p>
+    <p>Error: <span th:text="${error}"></span></p>
+    <p>Mensaje: <span th:text="${message}"></span></p>
+    <p>Ruta: <span th:text="${path}"></span></p>  
+</body>
+</html>

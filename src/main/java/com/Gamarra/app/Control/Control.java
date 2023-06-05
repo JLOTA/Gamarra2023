@@ -289,6 +289,8 @@ public class Control {
     public String formPedido(Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
             model.addAttribute("servicios", servicioService.listarServicios());
+            model.addAttribute("detalles", detalles);
+            model.addAttribute("pedido", pedido);
             return "pedidosform";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -325,11 +327,11 @@ public class Control {
             sumaTotal = detalles.stream().mapToDouble(dt -> dt.getTotalUnitario()).sum();
 
             pedido.setSubtotal(sumaTotal);
-
+            model.addAttribute("servicios", servicioService.listarServicios());
             model.addAttribute("detalles", detalles);
             model.addAttribute("pedido", pedido);
 
-            return "cart";
+            return "pedidosform";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
             return "redirect:/login";
@@ -353,10 +355,11 @@ public class Control {
 
             pedido.setSubtotal(sumaTotal);
 
+            model.addAttribute("servicios", servicioService.listarServicios());
             model.addAttribute("detalles", detalles);
             model.addAttribute("pedido", pedido);
 
-            return "cart";
+            return "pedidosform";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
             return "redirect:/login";

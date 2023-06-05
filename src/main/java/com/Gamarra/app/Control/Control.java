@@ -9,12 +9,15 @@ import jakarta.servlet.http.*;
 import java.security.Principal;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RequiredArgsConstructor
 @Controller
@@ -24,12 +27,7 @@ public class Control {
     private final CategoriaService categoriaService;
     private final ClaseClienteService claseService;
     private final ClienteService clienteService;
-
     private final DetallePedidoService detalleService;
-    
-    Cliente clientePedido = new Cliente();
-    Empleado empleadoPedido = new Empleado();
-
     private final EstadoService estadoService;
     private final PedidoService pedidoService;
     private final PerfilService perfilService;
@@ -154,7 +152,7 @@ public class Control {
             return "redirect:/login";
         }
     }
-    
+
     @PostMapping("/clientes/buscar")
     public String buscarCliente(String dni, Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
@@ -275,9 +273,21 @@ public class Control {
 
     /*-----------------------*/
     @GetMapping("/pedidos")
-    public String mostrarPedidos(Model model, Principal principal) {
+    public String mostrarPedidos(Model model, Principal principal, @PageableDefault(size = 10) Pageable pageable) {
         if (usuarioLogeado(model, principal)) {
-            model.addAttribute("pedidos", pedidoService.listarPedidos());
+            Page<Pedido> pedidosPage = pedidoService.obtenerPedidosPaginados(pageable);
+            if (pedidosPage != null && pedidosPage.hasContent()) {
+                model.addAttribute("pedidos", pedidosPage.getContent());
+                model.addAttribute("currentPage", pedidosPage.getNumber());
+                model.addAttribute("totalPages", pedidosPage.getTotalPages());
+
+                String url = ServletUriComponentsBuilder.fromCurrentRequest()
+                        .replaceQueryParam("page", "{page}")
+                        .buildAndExpand("{page}")
+                        .toUriString();
+                model.addAttribute("url", url);
+            }
+
             return "pedidos";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -292,8 +302,6 @@ public class Control {
             model.addAttribute("servicios", servicioService.listarServicios());
             model.addAttribute("detalles", pedidoService.verCarrito());
             model.addAttribute("pedido", pedidoService.verPedido());
-            model.addAttribute("cliente", clientePedido);
-            model.addAttribute("empleado", empleadoPedido);
             return "pedidosform";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -304,15 +312,13 @@ public class Control {
     @PostMapping("/pedidos/cartd")
     public String cartPedidoDetalle(@RequestParam(value = "idServicio") int idServicio,
             @RequestParam(value = "cantidad") double cantidad,
-            @RequestParam(value = "observacion") String observacion, 
+            @RequestParam(value = "observacion") String observacion,
             Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
             pedidoService.agregarServicio(idServicio, cantidad, observacion);
             model.addAttribute("servicios", servicioService.listarServicios());
             model.addAttribute("detalles", pedidoService.verCarrito());
             model.addAttribute("pedido", pedidoService.verPedido());
-            model.addAttribute("cliente", clientePedido);
-            model.addAttribute("empleado", empleadoPedido);
 
             return "pedidosform";
         } else {
@@ -320,17 +326,15 @@ public class Control {
             return "redirect:/login";
         }
     }
-    
+
     @PostMapping("/pedidos/carte")
     public String cartPedidoEmpleado(@RequestParam(value = "dni") String dni,
             Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-            empleadoPedido=empleadoService.buscarEmpleadoPorDni(dni);
+            pedidoService.asignarEmpleado(dni);
             model.addAttribute("servicios", servicioService.listarServicios());
             model.addAttribute("detalles", pedidoService.verCarrito());
             model.addAttribute("pedido", pedidoService.verPedido());
-            model.addAttribute("empleado", empleadoPedido);
-            model.addAttribute("cliente", clientePedido);
 
             return "pedidosform";
         } else {
@@ -343,12 +347,10 @@ public class Control {
     public String cartPedidoCliente(@RequestParam(value = "documento") String documento,
             Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-            clientePedido=clienteService.buscarPorDocumento(documento);
-            model.addAttribute("cliente", clientePedido);
+            pedidoService.asignarCliente(documento);
             model.addAttribute("servicios", servicioService.listarServicios());
             model.addAttribute("detalles", pedidoService.verCarrito());
             model.addAttribute("pedido", pedidoService.verPedido());
-            model.addAttribute("empleado", empleadoPedido);
 
             return "pedidosform";
         } else {
@@ -356,7 +358,6 @@ public class Control {
             return "redirect:/login";
         }
     }
-
 
     @GetMapping("/pedidos/cart/{id}")
     public String quitarServicioCart(@PathVariable int id, Model model, Principal principal) {
@@ -366,8 +367,6 @@ public class Control {
             model.addAttribute("servicios", servicioService.listarServicios());
             model.addAttribute("detalles", pedidoService.verCarrito());
             model.addAttribute("pedido", pedidoService.verPedido());
-            model.addAttribute("empleado", empleadoPedido);
-            model.addAttribute("cliente", clientePedido);
             return "pedidosform";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -379,7 +378,7 @@ public class Control {
     @GetMapping("pedidos/grabar")
     public String grabarPedido(Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-            pedidoService.grabarPedidoConDetalles(empleadoPedido.getDni(), clientePedido.getDocumento());
+            pedidoService.grabarPedidoConDetalles();
             return "redirect:/pedidos";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");

@@ -1,13 +1,13 @@
 package com.Gamarra.app.Service;
 
-import com.Gamarra.app.Dto.DtoDetallePedido;
-import com.Gamarra.app.Dto.DtoPedido;
+import com.Gamarra.app.Dto.*;
 import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Persistencia.PedidoRepository;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -33,10 +33,19 @@ public class PedidoService {
         dtoPedido.setUsuario(usuarioService.buscarPorUsuario(usuario));
     }
 
-    public Pedido verPedido(){
+    public Pedido verPedido() {
         Pedido pedido = new Pedido();
-        pedido.setCliente(dtoPedido.getCliente());
-        pedido.setEmpleado(dtoPedido.getEmpleado());
+        if (dtoPedido.getCliente() == null) {
+            pedido.setCliente(new Cliente());
+        } else {
+            pedido.setCliente(dtoPedido.getCliente());
+        }
+        if (dtoPedido.getEmpleado() == null) {
+            pedido.setEmpleado(new Empleado());
+        } else {
+            pedido.setEmpleado(dtoPedido.getEmpleado());
+        }
+
         pedido.setEstado(dtoPedido.getEstado());
         pedido.setUsuario(dtoPedido.getUsuario());
         pedido.setFecha(dtoPedido.getFecha());
@@ -44,7 +53,7 @@ public class PedidoService {
         pedido.setSubtotal(dtoPedido.getSubtotal());
         return pedido;
     }
-    
+
     public void agregarServicio(int id, double cantidad, String observacion) {
         Servicio servicio = servicioService.buscarServicioPorId(id);
         dtoPedido.agregar(servicio, cantidad, observacion);
@@ -73,9 +82,15 @@ public class PedidoService {
         return listaDetalles;
     }
 
-    public String grabarPedidoConDetalles(String dniEmpleado, String documentoCliente) {
+    public void asignarCliente(String documentoCliente) {
         dtoPedido.setCliente(clienteService.buscarPorDocumento(documentoCliente));
+    }
+
+    public void asignarEmpleado(String dniEmpleado) {
         dtoPedido.setEmpleado(empleadoService.buscarEmpleadoPorDni(dniEmpleado));
+    }
+
+    public String grabarPedidoConDetalles() {
         Pedido pedidoGrabado = this.grabarPedido(dtoPedido);
         String msg = "";
         for (int i = 0; i < dtoPedido.getDetalles().size(); i++) {
@@ -144,4 +159,7 @@ public class PedidoService {
         }
     }
 
+    public Page<Pedido> obtenerPedidosPaginados(Pageable pageable) {
+        return pedidoRepository.findAll(pageable);
+    }
 }

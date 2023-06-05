@@ -43,8 +43,8 @@
                         <td th:text="${servicio.descripcion}"></td>
                         <td th:text="${servicio.precio}"></td>
                         <td>
-                            <a class="btn btn-primary" th:href="@{/servicios/form(id=${servicio.idServicio})}"><i class="bi bi-pencil-fill"></i> Editar</a>
-                            <a class="btn btn-danger" th:href="@{/servicios/borrar(id=${servicio.idServicio})}"><i class="bi bi-trash-fill"></i> Borrar</a>
+                            <a class="btn btn-primary" th:href="@{/servicios/form(idServicio=${servicio.idServicio})}"><i class="bi bi-pencil-fill"></i> Editar</a>
+                            <a class="btn btn-danger" th:href="@{/servicios/borrar(idServicio=${servicio.idServicio})}"><i class="bi bi-trash-fill"></i> Borrar</a>
                         </td>
                     </tr>
                 </tbody>

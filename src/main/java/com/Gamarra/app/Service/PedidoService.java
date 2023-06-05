@@ -1,28 +1,105 @@
 package com.Gamarra.app.Service;
 
-import com.Gamarra.app.Negocio.Pedido;
+import com.Gamarra.app.Dto.DtoDetallePedido;
+import com.Gamarra.app.Dto.DtoPedido;
+import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Persistencia.PedidoRepository;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class PedidoService {
 
-    private final PedidoRepository pedidoRepository;
+    private DtoPedido dtoPedido;
 
-    @Autowired
-    public PedidoService(PedidoRepository pedidoRepository) {
-        this.pedidoRepository = pedidoRepository;
+    private final PedidoRepository pedidoRepository;
+    private final ClienteService clienteService;
+    private final EmpleadoService empleadoService;
+    private final UsuarioService usuarioService;
+    private final EstadoService estadoService;
+    private final ServicioService servicioService;
+    private final DetallePedidoService detalleService;
+
+    public void nuevoPedido(String usuario) {
+        dtoPedido = new DtoPedido();
+        dtoPedido.setCorrelativo(this.generarCorrelativo());
+        dtoPedido.setFecha(this.obtenerFecha());
+        dtoPedido.setEstado(estadoService.buscarPorId(1));
+        dtoPedido.setUsuario(usuarioService.buscarPorUsuario(usuario));
+    }
+
+    public Pedido verPedido(){
+        Pedido pedido = new Pedido();
+        pedido.setCliente(dtoPedido.getCliente());
+        pedido.setEmpleado(dtoPedido.getEmpleado());
+        pedido.setEstado(dtoPedido.getEstado());
+        pedido.setUsuario(dtoPedido.getUsuario());
+        pedido.setFecha(dtoPedido.getFecha());
+        pedido.setCorrelativo(dtoPedido.getCorrelativo());
+        pedido.setSubtotal(dtoPedido.getSubtotal());
+        return pedido;
+    }
+    
+    public void agregarServicio(int id, double cantidad, String observacion) {
+        Servicio servicio = servicioService.buscarServicioPorId(id);
+        dtoPedido.agregar(servicio, cantidad, observacion);
+    }
+
+    public void quitarServicio(int id) {
+        dtoPedido.quitar(id);
+    }
+
+    public List<DtoDetallePedido> verCarrito() {
+        List<DtoDetallePedido> listaDetalles = new ArrayList<>();
+
+        if (dtoPedido != null) {
+            for (DtoDetallePedido dtoDetalle : dtoPedido.getDetalles()) {
+                DtoDetallePedido dtoDetalleCarrito = new DtoDetallePedido();
+                dtoDetalleCarrito.setServicio(dtoDetalle.getServicio());
+                dtoDetalleCarrito.setCantidad(dtoDetalle.getCantidad());
+                dtoDetalleCarrito.setObservacion(dtoDetalle.getObservacion());
+
+                dtoDetalleCarrito.setTotalUnitario(dtoDetalle.getTotalUnitario());
+
+                listaDetalles.add(dtoDetalleCarrito);
+            }
+        }
+
+        return listaDetalles;
+    }
+
+    public String grabarPedidoConDetalles(String dniEmpleado, String documentoCliente) {
+        dtoPedido.setCliente(clienteService.buscarPorDocumento(documentoCliente));
+        dtoPedido.setEmpleado(empleadoService.buscarEmpleadoPorDni(dniEmpleado));
+        Pedido pedidoGrabado = this.grabarPedido(dtoPedido);
+        String msg = "";
+        for (int i = 0; i < dtoPedido.getDetalles().size(); i++) {
+            DtoDetallePedido dtoDetalle = (DtoDetallePedido) dtoPedido.getDetalles().get(i);
+            msg = detalleService.grabarDetalle(dtoDetalle, pedidoGrabado);
+        }
+        return msg;
     }
 
     public List<Pedido> listarPedidos() {
         return pedidoRepository.findAll();
     }
 
-    public Pedido grabarPedido(Pedido pedido) {
-        return pedidoRepository.save(pedido);
+    public Pedido grabarPedido(DtoPedido dto) {
+        Pedido pedido = new Pedido();
+        pedido.setCliente(dto.getCliente());
+        pedido.setEmpleado(dto.getEmpleado());
+        pedido.setEstado(dto.getEstado());
+        pedido.setUsuario(dto.getUsuario());
+        pedido.setFecha(dto.getFecha());
+        pedido.setCorrelativo(dto.getCorrelativo());
+        pedido.setSubtotal(dto.getSubtotal());
+        pedidoRepository.save(pedido);
+        return pedido;
     }
 
     public String eliminarPedido(Pedido pedido) {
@@ -33,32 +110,32 @@ public class PedidoService {
     public Pedido buscarPorId(int id) {
         return pedidoRepository.findById(id).orElse(null);
     }
-    
-    public String generarCorrelativo(){
-        int numero=0;
-        String correlativo="";
-        
-        List<Pedido> pedidos =this.listarPedidos();
-        List<Integer> numeros= new ArrayList<Integer>();
-        
+
+    private String generarCorrelativo() {
+        int numero = 0;
+        String correlativo = "";
+
+        List<Pedido> pedidos = this.listarPedidos();
+        List<Integer> numeros = new ArrayList<Integer>();
+
         pedidos.stream().forEach(p -> numeros.add(p.getIdPedido()));
-        
-        if(pedidos.isEmpty()){
-            numero=1;
+
+        if (pedidos.isEmpty()) {
+            numero = 1;
         } else {
-            numero=numeros.stream().max(Integer::compare).get();
+            numero = numeros.stream().max(Integer::compare).get();
             numero++;
         }
-        
+
         correlativo = "P-" + String.format("%010d", numero);
-        
+
         return correlativo;
     }
-    
-    public Date obtenerFecha() {
+
+    private Date obtenerFecha() {
         SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         String fechaString = formato.format(new Date());
-        
+
         try {
             return formato.parse(fechaString);
         } catch (Exception e) {
@@ -66,4 +143,5 @@ public class PedidoService {
             return null;
         }
     }
+
 }

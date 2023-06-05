@@ -27,9 +27,6 @@ public class Control {
 
     private final DetallePedidoService detalleService;
     
-    List<DetallePedido> detalles = new ArrayList<DetallePedido>();
-    Pedido pedido = new Pedido();
-    
     Cliente clientePedido = new Cliente();
     Empleado empleadoPedido = new Empleado();
 
@@ -291,9 +288,10 @@ public class Control {
     @GetMapping("/pedidos/form")
     public String formPedido(Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
+            pedidoService.nuevoPedido(principal.getName());
             model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("pedido", pedido);
+            model.addAttribute("detalles", pedidoService.verCarrito());
+            model.addAttribute("pedido", pedidoService.verPedido());
             model.addAttribute("cliente", clientePedido);
             model.addAttribute("empleado", empleadoPedido);
             return "pedidosform";
@@ -309,32 +307,10 @@ public class Control {
             @RequestParam(value = "observacion") String observacion, 
             Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-            DetallePedido detalle = new DetallePedido();
-            Servicio servicio = new Servicio();
-            double sumaTotal = 0;
-
-            servicio = servicioService.buscarServicioPorId(idServicio);
-
-            detalle.setServicio(servicio);
-            detalle.setCantidad(cantidad);
-            detalle.setObservacion(observacion);
-            detalle.setTotalUnitario(servicio.getPrecio() * cantidad);
-
-            int idServicioAgregado = servicio.getIdServicio();
-            boolean ingresado = detalles.stream().anyMatch(s -> s.getServicio().getIdServicio() == idServicioAgregado);
-
-            if (!ingresado) {
-                detalles.add(detalle);
-            } else {
-                model.addAttribute("errorMessage", "El servicio ya se registro");
-            }
-
-            sumaTotal = detalles.stream().mapToDouble(dt -> dt.getTotalUnitario()).sum();
-
-            pedido.setSubtotal(sumaTotal);
+            pedidoService.agregarServicio(idServicio, cantidad, observacion);
             model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("pedido", pedido);
+            model.addAttribute("detalles", pedidoService.verCarrito());
+            model.addAttribute("pedido", pedidoService.verPedido());
             model.addAttribute("cliente", clientePedido);
             model.addAttribute("empleado", empleadoPedido);
 
@@ -350,10 +326,9 @@ public class Control {
             Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
             empleadoPedido=empleadoService.buscarEmpleadoPorDni(dni);
-            
             model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("pedido", pedido);
+            model.addAttribute("detalles", pedidoService.verCarrito());
+            model.addAttribute("pedido", pedidoService.verPedido());
             model.addAttribute("empleado", empleadoPedido);
             model.addAttribute("cliente", clientePedido);
 
@@ -371,8 +346,8 @@ public class Control {
             clientePedido=clienteService.buscarPorDocumento(documento);
             model.addAttribute("cliente", clientePedido);
             model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("pedido", pedido);
+            model.addAttribute("detalles", pedidoService.verCarrito());
+            model.addAttribute("pedido", pedidoService.verPedido());
             model.addAttribute("empleado", empleadoPedido);
 
             return "pedidosform";
@@ -386,23 +361,11 @@ public class Control {
     @GetMapping("/pedidos/cart/{id}")
     public String quitarServicioCart(@PathVariable int id, Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-            List<DetallePedido> pedidosNuevo = new ArrayList<DetallePedido>();
-            for (DetallePedido detallePedido : detalles) {
-                if (detallePedido.getServicio().getIdServicio() != id) {
-                    pedidosNuevo.add(detallePedido);
-                }
-            }
-
-            detalles = pedidosNuevo;
-
-            double sumaTotal = 0;
-            sumaTotal = detalles.stream().mapToDouble(dt -> dt.getTotalUnitario()).sum();
-
-            pedido.setSubtotal(sumaTotal);
+            pedidoService.quitarServicio(id);
 
             model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("pedido", pedido);
+            model.addAttribute("detalles", pedidoService.verCarrito());
+            model.addAttribute("pedido", pedidoService.verPedido());
             model.addAttribute("empleado", empleadoPedido);
             model.addAttribute("cliente", clientePedido);
             return "pedidosform";
@@ -416,29 +379,7 @@ public class Control {
     @GetMapping("pedidos/grabar")
     public String grabarPedido(Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-            if (!detalles.isEmpty()) {
-                pedido.setFecha(pedidoService.obtenerFecha());
-                pedido.setCorrelativo(pedidoService.generarCorrelativo());
-
-                /*setusuario, setempleado, setcliente*/
-                pedido.setCliente(clienteService.buscarPorId(1));
-                pedido.setEmpleado(empleadoService.buscarEmpleadoPorId(1));
-                pedido.setUsuario(usuarioService.buscarPorId(1));
-                pedido.setEstado(estadoService.buscarPorId(1));
-                
-                
-                pedidoService.grabarPedido(pedido);
-
-                for (DetallePedido dt : detalles) {
-                    dt.setPedido(pedido);
-                    detalleService.grabarDetalle(dt);
-                }
-
-                pedido = new Pedido();
-                empleadoPedido=new Empleado();
-                clientePedido=new Cliente();
-                detalles.clear();
-            }
+            pedidoService.grabarPedidoConDetalles(empleadoPedido.getDni(), clientePedido.getDocumento());
             return "redirect:/pedidos";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -450,9 +391,8 @@ public class Control {
     @GetMapping("/pedidos/cart")
     public String mostrarCart(Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("pedido", pedido);
-
+            model.addAttribute("detalles", pedidoService.verCarrito());
+            model.addAttribute("pedido", pedidoService.verPedido());
             return "cart";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -463,9 +403,8 @@ public class Control {
     @GetMapping("/pedidos/resumen")
     public String mostrarResumen(Model model, Principal principal) {
         if (usuarioLogeado(model, principal)) {
-
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("pedido", pedido);
+            model.addAttribute("pedido", pedidoService.verPedido());
+            model.addAttribute("detalles", pedidoService.verCarrito());
             return "pedidosresumen";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");

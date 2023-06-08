@@ -1,10 +1,12 @@
-
 package com.Gamarra.app.Control;
 
 import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Service.*;
-import com.Gamarra.app.Utils.AuthUtils;
+import com.Gamarra.app.Utils.*;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
@@ -17,10 +19,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @Controller
 @RequestMapping("/pedidos")
 public class PedidoControl {
+
     private final AuthUtils authUtils;
     private final PedidoService pedidoService;
     private final ServicioService servicioService;
-    
+
     @GetMapping("/")
     public String mostrarPedidos(Model model, Principal principal, @PageableDefault(size = 10) Pageable pageable) {
         if (authUtils.usuarioLogeado(model, principal)) {
@@ -159,4 +162,27 @@ public class PedidoControl {
             return "redirect:/login";
         }
     }
+
+    @GetMapping("/reporte")
+    public String obtenerReportes(Model model, Principal principal, @PageableDefault(size = 10) Pageable pageable) {
+        if (authUtils.usuarioLogeado(model, principal)) {
+            LocalDate fechaInicio = LocalDate.now().minusDays(7);//7 dias
+            LocalDate fechaFin = LocalDate.now();
+
+            Map<LocalDate, PedidoInforme> pedidosDiarios = pedidoService.obtenerPedidosDiarios(fechaInicio, fechaFin);
+            model.addAttribute("pedidosDiarios", pedidosDiarios);
+
+            Map<LocalDate, PedidoInforme> pedidosSemanales = pedidoService.obtenerPedidosSemanales(fechaInicio, fechaFin);
+            model.addAttribute("pedidosSemanales", pedidosSemanales);
+
+            Map<YearMonth, PedidoInforme> pedidosMensuales = pedidoService.obtenerPedidosMensuales(fechaInicio, fechaFin);
+            model.addAttribute("pedidosMensuales", pedidosMensuales);
+
+            return "pedidosreport";
+        } else {
+            model.addAttribute("errorMessage", "Usuario no encontrado");
+            return "redirect:/login";
+        }
+    }
+
 }

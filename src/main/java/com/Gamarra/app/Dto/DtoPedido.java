@@ -2,6 +2,7 @@
 package com.Gamarra.app.Dto;
 
 import com.Gamarra.app.Negocio.*;
+import java.time.LocalDate;
 import java.util.*;
 import lombok.*;
 
@@ -9,7 +10,7 @@ import lombok.*;
 @Setter
 public class DtoPedido {
     private String correlativo;
-    private Date fecha;
+    private LocalDate fecha;
     private Estado estado;
     private Usuario usuario;
     private Cliente cliente;

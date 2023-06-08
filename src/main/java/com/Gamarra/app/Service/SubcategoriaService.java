@@ -3,6 +3,7 @@ package com.Gamarra.app.Service;
 import com.Gamarra.app.Negocio.Subcategoria;
 import com.Gamarra.app.Persistencia.SubcategoriaRepository;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,19 @@ public class SubcategoriaService {
         this.subcategoriaRepository = subcategoriaRepository;
     }
 
-    public String grabarSubcategoria(Subcategoria subcategoria) {
-        subcategoriaRepository.save(subcategoria);
-        return "Subcategoria guardada: "+subcategoria.getNombre();
+    public Subcategoria buscarPorNombreOAbreviatura(String nombre, String abreviatura) {
+        Optional<Subcategoria> subcategoriaOptional = subcategoriaRepository.findByNombreOrAbreviatura(nombre, abreviatura);
+        return subcategoriaOptional.orElse(null);
+    }
+    
+    public boolean grabarSubcategoria(Subcategoria subcategoria) {
+        Subcategoria subcategoriaExistente=this.buscarPorNombreOAbreviatura(subcategoria.getNombre(), subcategoria.getAbreviatura());
+        if (subcategoriaExistente != null && (subcategoriaExistente.getIdSubcategoria()!= subcategoria.getIdSubcategoria())) {
+            return false;
+        } else {
+            subcategoriaRepository.save(subcategoria);
+            return true;
+        }
     }
 
     public Subcategoria buscarSubcategoriaPorId(int id) {

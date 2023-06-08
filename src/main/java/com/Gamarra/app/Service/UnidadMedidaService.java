@@ -3,6 +3,7 @@ package com.Gamarra.app.Service;
 import com.Gamarra.app.Negocio.UnidadMedida;
 import com.Gamarra.app.Persistencia.UnidadMedidaRepository;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,21 @@ public class UnidadMedidaService {
         this.unidadMedidaRepository = unidadMedidaRepository;
     }
 
-    public String grabarUnidadMedida(UnidadMedida unidad) {
-        unidadMedidaRepository.save(unidad);
-        return "Unidad de medida guardada: " + unidad.getNombre();
+    public UnidadMedida buscarPorNombreOAbreviatura(String nombre, String abreviatura) {
+        Optional<UnidadMedida> unidadOptional = unidadMedidaRepository.findByNombreOrAbreviatura(nombre, abreviatura);
+        return unidadOptional.orElse(null);
+    }
+
+    public boolean grabarUnidadMedida(UnidadMedida unidad) {
+        UnidadMedida unidadExistente = this.buscarPorNombreOAbreviatura(unidad.getNombre(), unidad.getAbreviatura());
+        boolean respuesta;
+        if (unidadExistente != null && (unidadExistente.getIdUnidad() != unidad.getIdUnidad())) {
+            respuesta = false;
+        } else {
+            unidadMedidaRepository.save(unidad);
+            respuesta = true;
+        }
+        return respuesta;
     }
 
     public UnidadMedida buscarUnidadMedidaPorId(int id) {

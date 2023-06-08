@@ -1,6 +1,7 @@
 package com.Gamarra.app.Negocio;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 import lombok.*;
 
@@ -35,7 +36,7 @@ public class Pedido {
     @Column(nullable = false)
     private double subtotal;
     @Column(nullable = false)
-    private Date fecha;
+    private LocalDate fecha;
 
     @ManyToOne
     @JoinColumn(name = "IdUsuario")

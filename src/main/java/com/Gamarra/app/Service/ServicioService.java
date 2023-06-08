@@ -21,6 +21,8 @@ public class ServicioService {
         if (servicioExistente != null && (servicioExistente.getIdServicio()!= servicio.getIdServicio())) {
             return false;
         } else {
+            String abreviatura = servicio.getCategoria().getAbreviatura()+" - "+servicio.getSubcategoria().getAbreviatura();
+            servicio.setAbreviatura(abreviatura);
             servicioRepository.save(servicio);
             return true;
         }

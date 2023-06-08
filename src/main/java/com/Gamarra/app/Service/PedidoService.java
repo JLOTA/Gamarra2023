@@ -3,7 +3,10 @@ package com.Gamarra.app.Service;
 import com.Gamarra.app.Dto.*;
 import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Persistencia.PedidoRepository;
-import java.text.SimpleDateFormat;
+import com.Gamarra.app.Utils.PedidoInforme;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -122,6 +125,58 @@ public class PedidoService {
         return "Pedido eliminado";
     }
 
+    public Map<LocalDate, PedidoInforme> obtenerPedidosDiarios(LocalDate fechaInicio, LocalDate fechaFin) {
+        List<Pedido> pedidos = pedidoRepository.findByFechaBetween(fechaInicio, fechaFin);
+
+        Map<LocalDate, PedidoInforme> pedidosDiarios = new TreeMap<>();
+        for (Pedido pedido : pedidos) {
+            LocalDate fechaPedido = pedido.getFecha();
+            PedidoInforme informe = pedidosDiarios.getOrDefault(fechaPedido, new PedidoInforme());
+
+            informe.incrementarCantidadPedidos();
+            informe.sumarGanancias(pedido.getSubtotal());
+
+            pedidosDiarios.put(fechaPedido, informe);
+        }
+
+        return pedidosDiarios;
+    }
+
+    public Map<LocalDate, PedidoInforme> obtenerPedidosSemanales(LocalDate fechaInicio, LocalDate fechaFin) {
+        List<Pedido> pedidos = pedidoRepository.findByFechaBetween(fechaInicio, fechaFin);
+
+        Map<LocalDate, PedidoInforme> pedidosSemanales = new TreeMap<>();
+        for (Pedido pedido : pedidos) {
+            LocalDate fechaPedido = pedido.getFecha();
+            LocalDate inicioSemana = fechaPedido.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            PedidoInforme informe = pedidosSemanales.getOrDefault(inicioSemana, new PedidoInforme());
+
+            informe.incrementarCantidadPedidos();
+            informe.sumarGanancias(pedido.getSubtotal());
+
+            pedidosSemanales.put(inicioSemana, informe);
+        }
+
+        return pedidosSemanales;
+    }
+
+    public Map<YearMonth, PedidoInforme> obtenerPedidosMensuales(LocalDate fechaInicio, LocalDate fechaFin) {
+        List<Pedido> pedidos = pedidoRepository.findByFechaBetween(fechaInicio, fechaFin);
+
+        Map<YearMonth, PedidoInforme> pedidosMensuales = new TreeMap<>();
+        for (Pedido pedido : pedidos) {
+            YearMonth yearMonth = YearMonth.from(pedido.getFecha());
+            PedidoInforme informe = pedidosMensuales.getOrDefault(yearMonth, new PedidoInforme());
+
+            informe.incrementarCantidadPedidos();
+            informe.sumarGanancias(pedido.getSubtotal());
+
+            pedidosMensuales.put(yearMonth, informe);
+        }
+
+        return pedidosMensuales;
+    }
+
     public Pedido buscarPorId(int id) {
         return pedidoRepository.findById(id).orElse(null);
     }
@@ -147,16 +202,11 @@ public class PedidoService {
         return correlativo;
     }
 
-    private Date obtenerFecha() {
-        SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-        String fechaString = formato.format(new Date());
-
-        try {
-            return formato.parse(fechaString);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    private LocalDate obtenerFecha() {
+        LocalDate fechaActual = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String fechaFormateada = fechaActual.format(formatter);
+        return LocalDate.parse(fechaFormateada, formatter);
     }
 
     public Page<Pedido> obtenerPedidosPaginados(Pageable pageable) {

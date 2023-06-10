@@ -210,6 +210,6 @@ public class PedidoService {
     }
 
     public Page<Pedido> obtenerPedidosPaginados(Pageable pageable) {
-        return pedidoRepository.findAll(pageable);
+        return pedidoRepository.findAllByOrderByFechaDesc(pageable);
     }
 }

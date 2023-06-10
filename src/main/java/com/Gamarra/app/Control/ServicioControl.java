@@ -35,7 +35,7 @@ public class ServicioControl {
     }
 
     @GetMapping("/form")
-    public String formServicio(@RequestParam(value = "idServicio", required = false) Servicio servicio, Model model, Principal principal) {
+    public String formServicio(@RequestParam(value = "id", required = false) Servicio servicio, Model model, Principal principal) {
         if (authUtils.usuarioLogeado(model, principal)) {
             if (servicio != null) {
                 model.addAttribute("editar", true);

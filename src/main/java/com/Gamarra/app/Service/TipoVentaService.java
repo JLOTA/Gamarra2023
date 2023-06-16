@@ -20,6 +20,10 @@ private final TipoVentaRepository tipoVentaRepository;
         return tipoVentaRepository.findAll();
     }
     
+    public  TipoVenta buscarPorId(int id){
+        return tipoVentaRepository.findById(id).orElse(null);
+    }
+    
     public String grabarTipo(TipoVenta tipo){
         tipoVentaRepository.save(tipo);
         return "Tipo de venta guardado";

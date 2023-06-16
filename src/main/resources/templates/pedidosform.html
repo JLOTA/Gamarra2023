@@ -21,7 +21,7 @@
                         <form method="post" th:action="@{/pedidos/cartc}">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control form-control-sm" name="documento"
-                                       th:value="${pedido.cliente.documento}" placeholder="Documento del cliente">
+                                       th:value="${pedido.cliente.documento}" placeholder="Documento del cliente" required>
                                 <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
                             </div>
                         </form>
@@ -38,7 +38,7 @@
                         <form method="post" th:action="@{/pedidos/carte}">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control form-control-sm" name="dni" th:value="${pedido.empleado.dni}"
-                                       placeholder="DNI del empleado">
+                                       placeholder="DNI del empleado" required>
                                 <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
                             </div>
                         </form>
@@ -103,17 +103,17 @@
                         <tr>
                     <form method="post" th:action="@{/pedidos/cartd}">
                         <td colspan="2">
-                            <select class="form-select form-select-sm" id="idServicio" name="idServicio">
+                            <select class="form-select form-select-sm" id="idServicio" name="idServicio" required>
                                 <option value="" disabled selected>-- Seleccionar Servicio --</option>
                                 <option th:each="servicio : ${servicios}" th:value="${servicio.idServicio}"
                                         th:text="${servicio.categoria.nombre + ' ' + servicio.subcategoria.nombre + ' - ' + servicio.abreviatura}"></option>
                             </select>
                         </td>
                         <td>
-                            <input type="text" class="form-control form-control-sm" id="cantidad" name="cantidad" placeholder="Cantidad">
+                            <input type="text" class="form-control form-control-sm" id="cantidad" name="cantidad" placeholder="Cantidad" required>
                         </td>
                         <td colspan="2">
-                            <input type="text" class="form-control form-control-sm" id="observacion" name="observacion" placeholder="Observación">
+                            <input type="text" class="form-control form-control-sm" id="observacion" name="observacion" placeholder="Observación" required>
                         </td>
                         <td>
                             <button type="submit" class="btn btn-info btn-sm"><i class="fa-solid fa-plus"></i></button>

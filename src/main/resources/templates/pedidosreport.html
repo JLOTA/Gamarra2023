@@ -11,88 +11,93 @@
     <body>
         <div th:replace="~{navbar.html}"></div>
         <div class="container">
-            <!-- Informe de Pedidos Diarios -->
-            <div class="my-5">
-                <h2>Informe de Pedidos Diarios</h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Cantidad de Pedidos</th>
-                            <th>Ganancias Totales</th>
-                            <th>Promedio de Ganancias</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Utiliza Thymeleaf para iterar sobre el mapa de pedidos diarios -->
-                        <tr th:each="entry : ${pedidosDiarios}">
-                            <td th:text="${entry.key}"></td>
-                            <td th:text="${entry.value.cantidadPedidos}"></td>
-                            <td th:text="${#numbers.formatDecimal(entry.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></td>
-                            <td th:text="${#numbers.formatDecimal(entry.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="chart-container">
-                    <canvas id="chartPedidosDiarios"></canvas>
+            <div class="row">
+                <div class="col my-5">
+                    <h2>Informe de Pedidos Diarios</h2>
+                    <table class="table table-sm table-responsive">
+                        <thead>
+                            <tr>
+                                <th class="w-25">Fecha</th>
+                                <th>Cantidad de Pedidos</th>
+                                <th>Ganancias Totales</th>
+                                <th>Promedio de Ganancias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry : ${pedidosDiarios}">
+                                <td th:text="${entry.key}"></td>
+                                <td th:text="${entry.value.cantidad}"></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(entry.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(entry.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="chart-container">
+                        <canvas id="chartPedidosDiarios"></canvas>
+                    </div>
+                </div>
+                <div class="col my-5">
+                    <h2>Informe de Pedidos Semanales</h2>
+                    <table class="table table-sm table-responsive">
+                        <thead>
+                            <tr>
+                                <th class="w-25">Semana</th>
+                                <th>Cantidad de Pedidos</th>
+                                <th>Ganancias Totales</th>
+                                <th>Promedio de Ganancias</th>
+                            </tr>
+                        </thead>
+                        <tbody>                        
+                            <tr th:each="entry : ${pedidosSemanales}">
+                                <td th:text="${entry.key}"></td>
+                                <td th:text="${entry.value.cantidad}"></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(entry.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(entry.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="chart-container">
+                        <canvas id="chartPedidosSemanales"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Informe de Pedidos Semanales -->
-            <div class="my-5">
-                <h2>Informe de Pedidos Semanales</h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Semana</th>
-                            <th>Cantidad de Pedidos</th>
-                            <th>Ganancias Totales</th>
-                            <th>Promedio de Ganancias</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Utiliza Thymeleaf para iterar sobre el mapa de pedidos semanales -->
-                        <tr th:each="entry : ${pedidosSemanales}">
-                            <td th:text="${entry.key}"></td>
-                            <td th:text="${entry.value.cantidadPedidos}"></td>
-                            <td th:text="${#numbers.formatDecimal(entry.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></td>
-                            <td th:text="${#numbers.formatDecimal(entry.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="chart-container">
-                    <canvas id="chartPedidosSemanales"></canvas>
+            <div class="row">
+                <div class="col my-5">
+                    <h2>Informe de Pedidos Mensuales</h2>
+                    <table class="table table-sm table-responsive">
+                        <thead>
+                            <tr>
+                                <th class="w-25">Mes</th>
+                                <th>Cantidad de Pedidos</th>
+                                <th>Ganancias Totales</th>
+                                <th>Promedio de Ganancias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry : ${pedidosMensuales}">
+                                <td th:text="${entry.key}"></td>
+                                <td th:text="${entry.value.cantidad}"></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(entry.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(entry.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="chart-container">
+                        <canvas id="chartPedidosMensuales"></canvas>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Informe de Pedidos Mensuales -->
-            <div class="my-5">
-                <h2>Informe de Pedidos Mensuales</h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Mes</th>
-                            <th>Cantidad de Pedidos</th>
-                            <th>Ganancias Totales</th>
-                            <th>Promedio de Ganancias</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Utiliza Thymeleaf para iterar sobre el mapa de pedidos mensuales -->
-                        <tr th:each="entry : ${pedidosMensuales}">
-                            <td th:text="${entry.key}"></td>
-                            <td th:text="${entry.value.cantidadPedidos}"></td>
-                            <td th:text="${#numbers.formatDecimal(entry.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></td>
-                            <td th:text="${#numbers.formatDecimal(entry.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="col my-5 chart-container">
+                    <canvas id="chartServiciosMes"></canvas>
+                </div>
             </div>
         </div>
         <script th:inline="javascript">
             // Obtener los datos de los pedidos diarios y semanales desde Thymeleaf
             var pedidosDiarios = /*[[${pedidosDiarios}]]*/ {};
             var pedidosSemanales = /*[[${pedidosSemanales}]]*/ {};
+            var pedidosMensuales = /*[[${pedidosMensuales}]]*/ {};
 
             // Crear el gráfico de pedidos diarios
             var ctxPedidosDiarios = document.getElementById('chartPedidosDiarios').getContext('2d');
@@ -101,17 +106,16 @@
                 data: {
                     labels: Object.keys(pedidosDiarios),
                     datasets: [{
-                        label: 'Pedidos Diarios',
-                        data: Object.values(pedidosDiarios).map(entry => entry.cantidadPedidos),
-                        backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                        borderColor: 'rgba(0, 123, 255, 1)',
-                        borderWidth: 2
-                    }]
+                            label: 'Número de pedidos',
+                            data: Object.values(pedidosDiarios).map(entry => entry.cantidad),
+                            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            borderWidth: 2
+                        }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false
-                    // ... otras opciones de configuración del gráfico
                 }
             });
 
@@ -122,18 +126,81 @@
                 data: {
                     labels: Object.keys(pedidosSemanales),
                     datasets: [{
-                        label: 'Pedidos Semanales',
-                        data: Object.values(pedidosSemanales).map(entry => entry.cantidadPedidos),
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 2
-                    }]
+                            label: 'Número de pedidos',
+                            data: Object.values(pedidosSemanales).map(entry => entry.cantidad),
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2
+                        }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false
-                    // ... otras opciones de configuración del gráfico
                 }
+            });
+
+            // Crear el gráfico de pedidos mensuales
+            var ctxPedidosMensuales = document.getElementById('chartPedidosMensuales').getContext('2d');
+            new Chart(ctxPedidosMensuales, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(pedidosMensuales),
+                    datasets: [{
+                            label: 'Número de pedidos',
+                            data: Object.values(pedidosMensuales).map(entry => entry.cantidad),
+                            backgroundColor: 'rgba(99, 255, 133, 0.5)',
+                            borderColor: 'rgba(99, 255, 200, 1)',
+                            borderWidth: 2
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            var serviciosDelMes = /*[[${serviciosDelMes}]]*/ {};
+            var labels = [];
+            var data = [];
+
+            // Recorrer el mapa de servicios más pedidos y llenar los arrays
+            Object.values(serviciosDelMes).forEach(value => {
+                Object.entries(value.serviciosSolicitados).forEach(([servicio, cantidad]) => {
+                    labels.push(servicio);
+                    data.push(cantidad);
+                });
+            });
+            // Crear el gráfico de tipo pie
+            var ctx = document.getElementById('chartServiciosMes').getContext('2d');
+            var serviciosMesChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                            data: data,
+                            label: 'Cantidad: ',
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)',
+                                'rgba(255, 159, 64, 0.7)'
+                            ],
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Servicios más solicitados'
+                        }
+                    }
+                },
             });
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>

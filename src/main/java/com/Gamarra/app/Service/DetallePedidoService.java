@@ -1,7 +1,6 @@
 package com.Gamarra.app.Service;
 
 import com.Gamarra.app.Dto.DtoDetallePedido;
-import com.Gamarra.app.Dto.DtoPedido;
 import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Persistencia.DetallePedidoRepository;
 import java.util.List;

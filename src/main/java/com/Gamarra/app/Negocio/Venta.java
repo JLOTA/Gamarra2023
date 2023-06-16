@@ -1,7 +1,7 @@
 package com.Gamarra.app.Negocio;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.*;
 
 @NoArgsConstructor @Getter @Setter @ToString
@@ -34,6 +34,6 @@ public class Venta {
     @Column(nullable = false)
     private double total;
     @Column(nullable = false)
-    private Date fecha;
+    private LocalDate fecha;
 
 }

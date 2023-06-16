@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Informe de Ventas</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://kit.fontawesome.com/9d72cb34f3.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+    </head>
+    <body>
+        <div th:replace="~{navbar.html}"></div>
+        <div class="container">
+        <h1>Informe de Ventas</h1>
+
+        <h2>Ventas Diarias</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                    <th>Ganancias Totales</th>
+                    <th>Promedio de Ganancias</th>
+                    <th>Servicios Solicitados</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="ventaDiaria : ${ventasDiarias}">
+                    <td th:text="${ventaDiaria.key}"></td>
+                    <td th:text="${ventaDiaria.value.cantidad}"></td>
+                    <td>S/ <span th:text="${#numbers.formatDecimal(ventaDiaria.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                    <td>S/ <span th:text="${#numbers.formatDecimal(ventaDiaria.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                    <td>
+                        <ul>
+                            <li th:each="entry : ${ventaDiaria.value.serviciosSolicitados}">
+                                <span th:text="${entry.key}"></span>: <span th:text="${entry.value}"></span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Ventas Semanales</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                    <th>Ganancias Totales</th>
+                    <th>Promedio de Ganancias</th>
+                    <th>Servicios Solicitados</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="ventaSemanal : ${ventasSemanales}">
+                    <td th:text="${ventaSemanal.key}"></td>
+                    <td th:text="${ventaSemanal.value.cantidad}"></td>
+                    <td>S/ <span th:text="${#numbers.formatDecimal(ventaSemanal.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                    <td>S/ <span th:text="${#numbers.formatDecimal(ventaSemanal.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                    <td>
+                        <ul>
+                            <li th:each="entry : ${ventaSemanal.value.serviciosSolicitados}">
+                                <span th:text="${entry.key}"></span>: <span th:text="${entry.value}"></span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Ventas Mensuales</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                    <th>Ganancias Totales</th>
+                    <th>Promedio de Ganancias</th>
+                    <th>Servicios Solicitados</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="ventaMensual : ${ventasMensuales}">
+                    <td th:text="${ventaMensual.key}"></td>
+                    <td th:text="${ventaMensual.value.cantidad}"></td>
+                    <td>S/ <span th:text="${#numbers.formatDecimal(ventaMensual.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                    <td>S/ <span th:text="${#numbers.formatDecimal(ventaMensual.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                    <td>
+                        <ul>
+                            <li th:each="entry : ${ventaMensual.value.serviciosSolicitados}">
+                                <span th:text="${entry.key}"></span>: <span th:text="${entry.value}"></span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <canvas id="ventasSemanalesChart"></canvas>
+    </div>
+        <script th:inline="javascript">
+            var ventasMensuales = /*[[${ventasMensuales}]]*/ {};
+            var labels = [];
+            var data = [];
+
+            Object.values(ventasMensuales).forEach(value => {
+                Object.entries(value.serviciosSolicitados).forEach(([servicio, cantidad]) => {
+                    labels.push(servicio);
+                    data.push(cantidad);
+                });
+            });
+
+            // Crear el gráfico de tipo pie
+            var ctx = document.getElementById('ventasSemanalesChart').getContext('2d');
+            var ventasSemanalesChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                            data: data,
+                            label: 'Cantidad: ',
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)',
+                                'rgba(255, 159, 64, 0.7)'
+                            ],
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Servicios más solicitados del mes'
+                        }
+                    }
+                },
+            });
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
+    </body>
+</html>

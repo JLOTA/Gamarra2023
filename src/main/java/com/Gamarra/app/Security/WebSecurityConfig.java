@@ -27,11 +27,12 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/", "/login").permitAll()
+                .requestMatchers("/empleados/form").hasRole("ADMINISTRADOR")
                 .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/ventas")
+                .defaultSuccessUrl("/ventas/")
                 .permitAll()
                 )
                 .logout((logout) -> logout.permitAll());

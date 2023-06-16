@@ -4,9 +4,6 @@ import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Service.*;
 import com.Gamarra.app.Utils.*;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
@@ -22,6 +19,7 @@ public class PedidoControl {
 
     private final AuthUtils authUtils;
     private final PedidoService pedidoService;
+    private final DetallePedidoService detalleService;
     private final ServicioService servicioService;
 
     @GetMapping("/")
@@ -138,13 +136,16 @@ public class PedidoControl {
         }
     }
 
-    /*posible implementacion*/
-    @GetMapping("/cart")
-    public String mostrarCart(Model model, Principal principal) {
+    @GetMapping("/ver")
+    public String mostrarPedido(@RequestParam(value = "id") Pedido pedido, Model model, Principal principal) {
         if (authUtils.usuarioLogeado(model, principal)) {
-            model.addAttribute("detalles", pedidoService.verCarrito());
-            model.addAttribute("pedido", pedidoService.verPedido());
-            return "cart";
+            if (pedido != null) {
+                model.addAttribute("pedido", pedido);
+                model.addAttribute("detalles", detalleService.listarDetallesPorPedido(pedido));
+                return "pedidosvista";
+            } else {
+                return "redirect:/pedidos/";
+            }
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
             return "redirect:/login";
@@ -166,17 +167,10 @@ public class PedidoControl {
     @GetMapping("/reporte")
     public String obtenerReportes(Model model, Principal principal, @PageableDefault(size = 10) Pageable pageable) {
         if (authUtils.usuarioLogeado(model, principal)) {
-            LocalDate fechaInicio = LocalDate.now().minusDays(7);//7 dias
-            LocalDate fechaFin = LocalDate.now();
-
-            Map<LocalDate, PedidoInforme> pedidosDiarios = pedidoService.obtenerPedidosDiarios(fechaInicio, fechaFin);
-            model.addAttribute("pedidosDiarios", pedidosDiarios);
-
-            Map<LocalDate, PedidoInforme> pedidosSemanales = pedidoService.obtenerPedidosSemanales(fechaInicio, fechaFin);
-            model.addAttribute("pedidosSemanales", pedidosSemanales);
-
-            Map<YearMonth, PedidoInforme> pedidosMensuales = pedidoService.obtenerPedidosMensuales(fechaInicio, fechaFin);
-            model.addAttribute("pedidosMensuales", pedidosMensuales);
+            model.addAttribute("pedidosDiarios", pedidoService.obtenerPedidosDiarios());
+            model.addAttribute("pedidosSemanales", pedidoService.obtenerPedidosSemanales());
+            model.addAttribute("pedidosMensuales", pedidoService.obtenerPedidosMensuales());
+            model.addAttribute("serviciosDelMes", pedidoService.obtenerServiciosMasPedidosDelMes());
 
             return "pedidosreport";
         } else {

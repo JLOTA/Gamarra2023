@@ -30,7 +30,7 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{'/clientes/'}"><i class="fa-solid fa-address-book mx-3"></i>Clientes</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" th:if="${usuarioLog.idUsuario == 1}">
                     <a class="nav-link" th:href="@{'/empleados/'}"><i class="fa-solid fa-otter mx-3"></i>Otros</a>
                     <ul class="dropdown-menu">
                         <!-- Otras opciones del menú -->

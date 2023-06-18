@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class PedidoService {
 
     private DtoPedido dtoPedido;
+    private JsonUtils json;
 
     private final PedidoRepository pedidoRepository;
     private final ClienteService clienteService;
@@ -90,7 +91,7 @@ public class PedidoService {
     }
 
     public void asignarEmpleado(String dniEmpleado) {
-        dtoPedido.setEmpleado(empleadoService.buscarEmpleadoPorDni(dniEmpleado));
+        dtoPedido.setEmpleado(empleadoService.buscarPorDni(dniEmpleado));
     }
 
     public String grabarPedidoConDetalles() {
@@ -189,26 +190,31 @@ public class PedidoService {
         return pedidosMensuales;
     }
 
-    public Map<String, Informe> obtenerServiciosMasPedidosDelMes() { // de los ultimos 30 dias
+    public String obtenerServiciosMasPedidosDelMes() { // de los ultimos 30 dias
         LocalDate fechaInicio = LocalDate.now().minusDays(30);
         LocalDate fechaFin = LocalDate.now();
         List<Pedido> pedidos = pedidoRepository.findByFechaBetween(fechaInicio, fechaFin);
 
-        Map<String, Informe> serviciosMasPedidos = new TreeMap<>();
+        Map<String, Double> serviciosMasPedidos = new TreeMap<>();
+
         for (Pedido pedido : pedidos) {
             for (DetallePedido detalle : pedido.getDetalles()) {
                 Servicio servicio = detalle.getServicio();
                 String nombreServicio = servicio.getAbreviatura();
-                Informe informe = serviciosMasPedidos.getOrDefault(nombreServicio, new Informe());
-                informe.incrementarSolicitudesServicio(nombreServicio);
-                serviciosMasPedidos.put(nombreServicio, informe);
+                Double cantidadServicio = serviciosMasPedidos.getOrDefault(nombreServicio, 0.0);
+                cantidadServicio += detalle.getCantidad();
+                serviciosMasPedidos.put(nombreServicio, cantidadServicio);
             }
         }
-        return serviciosMasPedidos;
+        return JsonUtils.toJson(serviciosMasPedidos);
     }
 
     public Pedido buscarPorId(int id) {
         return pedidoRepository.findById(id).orElse(null);
+    }
+    
+    public Page<Pedido> buscarPorCorrelativo(Pageable pageable, String correlativo) {
+        return pedidoRepository.findAllByCorrelativoContainingOrderByFechaDesc(correlativo, pageable);
     }
 
     private String generarCorrelativo() {

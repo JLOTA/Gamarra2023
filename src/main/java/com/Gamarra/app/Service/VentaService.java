@@ -3,6 +3,7 @@ package com.Gamarra.app.Service;
 import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Persistencia.*;
 import com.Gamarra.app.Utils.Informe;
+import com.Gamarra.app.Utils.JsonUtils;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
@@ -99,6 +100,10 @@ public class VentaService {
     public Page<Venta> obtenerVentasPaginados(Pageable pageable) {
         return ventaRepository.findAllByOrderByFechaDesc(pageable);
     }
+    
+    public Page<Venta> buscarPorCorrelativo(Pageable pageable, String correlativo) {
+        return ventaRepository.findAllByCorrelativoContainingOrderByFechaDesc(correlativo, pageable);
+    }
 
     public Map<LocalDate, Informe> obtenerVentasDiarias() {
         LocalDate fechaInicio = LocalDate.now().minusDays(7);
@@ -183,5 +188,24 @@ public class VentaService {
         }
 
         return ventasMensuales;
+    }
+    
+    public String obtenerServiciosMasVendidosDelMes() { // de los ultimos 30 dias
+        LocalDate fechaInicio = LocalDate.now().minusDays(30);
+        LocalDate fechaFin = LocalDate.now();
+        List<Venta> ventas = ventaRepository.findByFechaBetween(fechaInicio, fechaFin);
+
+        Map<String, Double> serviciosMasVendidos = new TreeMap<>();
+
+        for (Venta ven : ventas) {
+            for (DetallePedido detalle : ven.getPedido().getDetalles()) {
+                Servicio servicio = detalle.getServicio();
+                String nombreServicio = servicio.getAbreviatura();
+                Double cantidadServicio = serviciosMasVendidos.getOrDefault(nombreServicio, 0.0);
+                cantidadServicio += detalle.getCantidad();
+                serviciosMasVendidos.put(nombreServicio, cantidadServicio);
+            }
+        }
+        return JsonUtils.toJson(serviciosMasVendidos);
     }
 }

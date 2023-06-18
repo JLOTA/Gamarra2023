@@ -23,21 +23,8 @@ public class PedidoControl {
     private final ServicioService servicioService;
 
     @GetMapping("/")
-    public String mostrarPedidos(Model model, Principal principal, @PageableDefault(size = 10) Pageable pageable) {
+    public String mostrarPedidos(Model model, Principal principal) {
         if (authUtils.usuarioLogeado(model, principal)) {
-            Page<Pedido> pedidosPage = pedidoService.obtenerPedidosPaginados(pageable);
-            if (pedidosPage != null && pedidosPage.hasContent()) {
-                model.addAttribute("pedidos", pedidosPage.getContent());
-                model.addAttribute("currentPage", pedidosPage.getNumber());
-                model.addAttribute("totalPages", pedidosPage.getTotalPages());
-
-                String url = ServletUriComponentsBuilder.fromCurrentRequest()
-                        .replaceQueryParam("page", "{page}")
-                        .buildAndExpand("{page}")
-                        .toUriString();
-                model.addAttribute("url", url);
-            }
-
             return "pedidos";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -178,5 +165,40 @@ public class PedidoControl {
             return "redirect:/login";
         }
     }
+
+    @GetMapping("/buscar")
+    public String buscarPedidos(@RequestParam("correlativo") String correlativo, Model model, @PageableDefault(size = 10) Pageable pageable) {
+        Page<Pedido> pedidosPage = pedidoService.buscarPorCorrelativo(pageable, correlativo);
+        if (pedidosPage != null && pedidosPage.hasContent()) {
+            model.addAttribute("pedidos", pedidosPage.getContent());
+            model.addAttribute("currentPage", pedidosPage.getNumber());
+            model.addAttribute("totalPages", pedidosPage.getTotalPages());
+
+            String url = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .replaceQueryParam("page", "{page}")
+                    .buildAndExpand("{page}")
+                    .toUriString();
+            model.addAttribute("url", url);
+        }
+        return "fragmentos/tablas :: tablaPedido";
+    }
+    
+    @GetMapping("/listar")
+    public String listarPedidos(Model model, @PageableDefault(size = 10) Pageable pageable) {
+        Page<Pedido> pedidosPage = pedidoService.obtenerPedidosPaginados(pageable);
+            if (pedidosPage != null && pedidosPage.hasContent()) {
+                model.addAttribute("pedidos", pedidosPage.getContent());
+                model.addAttribute("currentPage", pedidosPage.getNumber());
+                model.addAttribute("totalPages", pedidosPage.getTotalPages());
+
+                String url = ServletUriComponentsBuilder.fromCurrentRequest()
+                        .replaceQueryParam("page", "{page}")
+                        .buildAndExpand("{page}")
+                        .toUriString();
+                model.addAttribute("url", url);
+            }
+        return "fragmentos/tablas :: tablaPedido";
+    }
+    
 
 }

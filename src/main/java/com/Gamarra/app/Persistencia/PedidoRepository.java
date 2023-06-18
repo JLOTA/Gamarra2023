@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 
     Page<Pedido> findAllByOrderByFechaDesc(Pageable pageable);  
+    Page<Pedido> findAllByCorrelativoContainingOrderByFechaDesc(String correlativo, Pageable pageable);
     List<Pedido> findByFechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
 
 }

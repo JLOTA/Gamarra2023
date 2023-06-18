@@ -97,22 +97,15 @@
             </tbody>
         </table>
 
-        <canvas id="ventasSemanalesChart"></canvas>
+        <canvas id="chartServiciosMes"></canvas>
     </div>
         <script th:inline="javascript">
-            var ventasMensuales = /*[[${ventasMensuales}]]*/ {};
-            var labels = [];
-            var data = [];
-
-            Object.values(ventasMensuales).forEach(value => {
-                Object.entries(value.serviciosSolicitados).forEach(([servicio, cantidad]) => {
-                    labels.push(servicio);
-                    data.push(cantidad);
-                });
-            });
-
+            var serviciosDelMes = /*[[${serviciosDelMes}]]*/ {};
+            var serviciosDelMesJson = JSON.parse(serviciosDelMes);
+            var labels= Object.keys(serviciosDelMesJson);
+            var data= Object.values(serviciosDelMesJson);
             // Crear el gráfico de tipo pie
-            var ctx = document.getElementById('ventasSemanalesChart').getContext('2d');
+            var ctx = document.getElementById('chartServiciosMes').getContext('2d');
             var ventasSemanalesChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
@@ -138,7 +131,7 @@
                         },
                         title: {
                             display: true,
-                            text: 'Servicios más solicitados del mes'
+                            text: 'Servicios más vendidos del mes'
                         }
                     }
                 },

@@ -1,0 +1,181 @@
+<!-- tabla pedido -->
+<div class="container" id="tabla-pedidos" th:fragment="tablaPedido">
+    <table class="table table-sm table-responsive mt-3">
+        <thead>
+            <tr>
+                <th>Correlativo</th>
+                <th>Cliente</th>
+                <th>Empleado</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="pedido : ${pedidos}">
+                <td th:text="${pedido.correlativo}"></td>
+                <td th:text="${pedido.cliente.nombre}"></td>
+                <td th:text="${pedido.empleado.nombre}"></td>
+                <td>
+                    <span th:text="${pedido.estado.nombre}" 
+                          th:class="${pedido.estado.idEstado == 1 ? 'badge rounded-pill text-bg-success' : pedido.estado.idEstado == 2 ? 'badge rounded-pill text-bg-warning' : pedido.estado.idEstado == 3 ? 'badge rounded-pill text-bg-danger' : ''}"></span>
+                </td>
+                <td th:text="${#temporals.format(pedido.fecha, 'dd-MM-yyyy')}"></td>
+                <td>
+                    <a class="btn btn-secondary me-2" th:href="@{/pedidos/ver(id=${pedido.idPedido})}"><i class="fa-solid fa-eye"></i></a>
+                    <a class="btn btn-primary" th:href="@{/ventas/generar(id=${pedido.idPedido})}" th:classappend="${pedido.estado.idEstado == 3 ? 'disabled' : ''}"><i class="fa-solid fa-forward-step"></i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:unless="${currentPage == 0}">
+                <a class="page-link" th:href="@{${url}(page=${currentPage - 1})}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
+                th:class="${pageNumber == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{${url}(page=${pageNumber})}" th:text="${pageNumber + 1}"></a>
+            </li>
+            <li class="page-item" th:unless="${currentPage == totalPages - 1}">
+                <a class="page-link" th:href="@{${url}(page=${currentPage + 1})}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<!-- tabla venta -->
+<div class="container" id="tabla-ventas" th:fragment="tablaVenta">
+    <table class="table table-sm table-responsive mt-3">
+        <thead>
+            <tr>
+                <th>Correlativo</th>
+                <th>Tipo de Comprobante</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Descuento</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="venta : ${ventas}">
+                <td th:text="${venta.correlativo}"></td>
+                <td th:text="${venta.tipoVenta.nombre}"></td>
+                <td th:text="${venta.pedido.cliente.nombre}"></td>
+                <td th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy')}"></td>
+                <td>S/ <span th:text="${venta.descuento}"></span></td>
+                <td>S/ <span th:text="${venta.total}"></span></td>
+                <td>
+                    <a class="btn btn-secondary me-2" th:href="@{/ventas/ver(id=${venta.idVenta})}"><i class="fa-solid fa-eye"></i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:unless="${currentPage == 0}">
+                <a class="page-link" th:href="@{${url}(page=${currentPage - 1})}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
+                th:class="${pageNumber == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{${url}(page=${pageNumber})}" th:text="${pageNumber + 1}"></a>
+            </li>
+            <li class="page-item" th:unless="${currentPage == totalPages - 1}">
+                <a class="page-link" th:href="@{${url}(page=${currentPage + 1})}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<!-- tabla empleado -->
+<div class="container" id="tabla-empleados" th:fragment="tablaEmpleado">
+    <table class="table table-sm table-responsive mt-3">
+        <thead>
+            <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="empleado : ${empleados}">
+                <td th:text="${empleado.dni}"></td>
+                <td th:text="${empleado.nombre}"></td>
+                <td th:text="${empleado.apellido}"></td>
+                <td th:text="${empleado.telefono}"></td>
+                <td th:text="${empleado.correo}"></td>
+                <td>
+                    <a class="btn btn-warning me-2" th:onclick="'formEmpleado(' + ${empleado.idEmpleado} + ')'"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <a class="btn btn-danger" th:href="@{/empleados/borrar(id=${empleado.idEmpleado})}"><i class="fa-solid fa-trash"></i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<!-- tabla cliente -->
+<div class="container" id="tabla-clientes" th:fragment="tablaCliente">
+    <table class="table table-sm table-responsive mt-3">
+        <thead>
+            <tr>
+                <th>Tipo documento</th>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="cliente : ${clientes}">
+                <td th:text="${cliente.claseCliente.nombre}"></td>
+                <td th:text="${cliente.documento}"></td>
+                <td th:text="${cliente.nombre}"></td>
+                <td th:text="${cliente.telefono}"></td>
+                <td th:text="${cliente.direccion}"></td>
+                <td>
+                    <a class="btn btn-warning me-2" th:onclick="'formCliente(' + ${cliente.idCliente} + ')'"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <a class="btn btn-danger" th:href="@{/clientes/borrar(id=${cliente.idCliente})}"><i class="fa-solid fa-trash"></i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="container" id="tabla-servicios" th:fragment="tablaServicio">
+    <table class="table table-sm table-responsive mt-3">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Unidad de Medida</th>
+                <th>Abreviatura</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="servicio : ${servicios}">
+                <td th:text="${servicio.categoria.nombre+' '+servicio.subcategoria.nombre}"></td>
+                <td th:text="${servicio.unidadMedida.abreviatura}"></td>
+                <td th:text="${servicio.abreviatura}"></td>
+                <td th:text="${servicio.descripcion}"></td>
+                <td>S/ <span th:text="${servicio.precio}"></span></td>
+                <td>
+                    <a class="btn btn-warning me-2" th:onclick="'formServicio(' + ${servicio.idServicio} + ')'"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <a class="btn btn-danger" th:href="@{/servicios/borrar(id=${servicio.idServicio})}"><i class="fa-solid fa-trash"></i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

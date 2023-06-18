@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RequiredArgsConstructor
 @Controller
@@ -25,8 +26,6 @@ public class ServicioControl {
     @GetMapping("/")
     public String mostrarServicios(Model model, Principal principal) {
         if (authUtils.usuarioLogeado(model, principal)) {
-            List<Servicio> servicios = servicioService.listarServicios();
-            model.addAttribute("servicios", servicios);
             return "servicios";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -34,43 +33,48 @@ public class ServicioControl {
         }
     }
 
+    @GetMapping("/listar")
+    public String listarServicios(Model model) {
+        List<Servicio> servicios = servicioService.listarServicios();
+        model.addAttribute("servicios", servicios);
+        return "fragmentos/tablas :: tablaServicio";
+    }
+
     @GetMapping("/form")
-    public String formServicio(@RequestParam(value = "id", required = false) Servicio servicio, Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            if (servicio != null) {
-                model.addAttribute("editar", true);
-            } else {
-                servicio = new Servicio();
-            }
-            model.addAttribute("categorias", categoriaService.listarCategorias());
-            model.addAttribute("subcategorias", subcategoriaService.listarSubcategorias());
-            model.addAttribute("unidades", unidadService.listarUnidadesMedida());
-            model.addAttribute("servicio", servicio);
-            return "serviciosform";
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
+    public String formServicio(@RequestParam(value = "id", required = false) Integer idServicio, Model model) {
+        Servicio servicio = null;
+        if (idServicio != null) {
+            servicio = servicioService.buscarServicioPorId(idServicio);
         }
+        if (servicio != null) {
+            model.addAttribute("titulo", "Editar Servicio");
+        } else {
+            servicio = new Servicio();
+            model.addAttribute("titulo", "Nuevo Servicio");
+        }
+        model.addAttribute("categorias", categoriaService.listarCategorias());
+        model.addAttribute("subcategorias", subcategoriaService.listarSubcategorias());
+        model.addAttribute("unidades", unidadService.listarUnidadesMedida());
+        model.addAttribute("servicio", servicio);
+        return "fragmentos/modals :: modalServicio";
     }
 
     @PostMapping("/grabar")
-    public String guardarServicio(@ModelAttribute("servicio") Servicio servicio, Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            servicio.setUsuario(usuarioService.buscarPorUsuario(principal.getName()));
-            if (servicioService.grabarServicio(servicio)) {
-                return "redirect:/servicios/";
-            } else {
-                model.addAttribute("categorias", categoriaService.listarCategorias());
-                model.addAttribute("subcategorias", subcategoriaService.listarSubcategorias());
-                model.addAttribute("unidades", unidadService.listarUnidadesMedida());
-                model.addAttribute("servicio", servicio);
-                model.addAttribute("errorMessage", "Ya existe un este servicio: " + servicio.getCategoria().getAbreviatura() + "-" + servicio.getSubcategoria().getAbreviatura());
-                return "serviciosform";
-            }
+    public String grabarServicio(@ModelAttribute("servicio") Servicio servicio, RedirectAttributes redirectAttributes, Principal principal) {
+        servicio.setUsuario(usuarioService.buscarPorUsuario(principal.getName()));
+        if (servicioService.grabarServicio(servicio)) {
+            redirectAttributes.addFlashAttribute("successMessage", "Servicio registrado exitosamente!!");
         } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
+            redirectAttributes.addFlashAttribute("errorMessage", "El Servicio ingresado ya está registrado");
         }
+        return "redirect:/servicios/";
+    }
+    
+    @GetMapping("/buscar")
+    public String buscarServicio(@RequestParam("abreviatura") String abreviatura, Model model) {
+        List<Servicio> servicios = servicioService.buscarPorAbrevitura(abreviatura);
+        model.addAttribute("servicios", servicios);
+        return "fragmentos/tablas :: tablaServicio";
     }
 
     @PostMapping("/grabarCategoria")

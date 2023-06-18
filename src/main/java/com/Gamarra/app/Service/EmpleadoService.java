@@ -17,7 +17,7 @@ public class EmpleadoService {
     }
 
     public boolean grabarEmpleado(Empleado empleado) {
-        Empleado empleadoExistente = this.buscarEmpleadoPorDni(empleado.getDni());
+        Empleado empleadoExistente = this.buscarPorDni(empleado.getDni());
         if (empleadoExistente != null && (empleadoExistente.getIdEmpleado() != empleado.getIdEmpleado())) {
             return false;
         } else {
@@ -39,7 +39,11 @@ public class EmpleadoService {
         return "Empleado eliminado";
     }
 
-    public Empleado buscarEmpleadoPorDni(String dni) {
+    public Empleado buscarPorDni(String dni){
         return empleadoRepository.findByDni(dni);
+    }
+    
+    public List<Empleado> buscarEmpleadosPorDni(String dni) {
+        return empleadoRepository.findAllByDniContaining(dni);
     }
 }

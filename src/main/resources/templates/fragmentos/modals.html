@@ -1,0 +1,146 @@
+<!-- modal empleado -->
+<div th:fragment="modalEmpleado" class="modal fade" id="empleadoModal" tabindex="-1" aria-labelledby="empleadoModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel" th:text="${titulo}"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:object="${empleado}" th:action="@{/empleados/grabar}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="idEmpleado" th:field="*{idEmpleado}">
+                    <div class="mb-3">
+                        <label for="dni" class="form-label">DNI</label>
+                        <input type="text" class="form-control" id="dni" th:field="*{dni}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="apellido" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" id="apellido" th:field="*{apellido}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono" th:field="*{telefono}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="correo" th:field="*{correo}" required>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Grabar</button>
+                </div>    
+            </form>
+        </div>
+    </div>
+</div>
+<!-- modal cliente -->
+<div th:fragment="modalCliente" class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel" th:text="${titulo}"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:object="${cliente}" th:action="@{/clientes/grabar}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="idCliente" th:field="*{idCliente}">
+                    <div class="mb-3">
+                        <label for="tipoDocumento" class="form-label">Tipo de Documento</label>
+                        <select class="form-select" id="tipoDocumento" th:field="*{claseCliente}">
+                            <option th:each="clase : ${clases}"
+                                    th:value="${clase.idClase}"
+                                    th:text="${clase.nombre}"
+                                    th:selected="${cliente.claseCliente != null && clase.idClase == cliente.claseCliente.idClase}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documento" class="form-label">Documento</label>
+                        <input type="text" class="form-control" id="documento" th:field="*{documento}" placeholder="Número de documento de ocho u once dígitos" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" placeholder="Nombre corporativo o nombre completo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono" th:field="*{telefono}" placeholder="Número de télefono de nueve digitos" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="direccion" th:field="*{direccion}" placeholder="Los Jardines 128, San Juan de Lurigancho" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Grabar</button>
+                </div>    
+            </form>
+        </div>
+    </div>
+</div>
+<!-- modal servicio -->
+<div th:fragment="modalServicio" class="modal fade" id="servicioModal" tabindex="-1" aria-labelledby="servicioModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel" th:text="${titulo}"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:object="${servicio}" th:action="@{/servicios/grabar}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" th:field="${servicio.idServicio}">
+
+                    <div class="mb-3">
+                        <label for="categoriaSelect" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoriaSelect" th:field="${servicio.categoria}">
+                            <option th:each="categoria : ${categorias}" 
+                                    th:value="${categoria.idCategoria}" 
+                                    th:text="${categoria.nombre}" 
+                                    th:selected="${servicio.categoria != null && categoria.idCategoria == servicio.categoria.idCategoria}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subcategoriaSelect" class="form-label">Subcategoría</label>
+                        <select class="form-select" id="subcategoriaSelect" th:field="${servicio.subcategoria}">
+                            <option th:each="subcategoria : ${subcategorias}" 
+                                    th:value="${subcategoria.idSubcategoria}" 
+                                    th:text="${subcategoria.nombre}" 
+                                    th:selected="${servicio.subcategoria != null && subcategoria.idSubcategoria == servicio.subcategoria.idSubcategoria}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="unidadMedidaSelect" class="form-label">Unidad de Medida</label>
+                        <select class="form-select" id="unidadMedidaSelect" th:field="${servicio.unidadMedida}">
+                            <option th:each="unidad : ${unidades}" 
+                                    th:value="${unidad.idUnidad}" 
+                                    th:text="${unidad.nombre+' - '+unidad.abreviatura}" 
+                                    th:selected="${servicio.unidadMedida != null && unidad.idUnidad == servicio.unidadMedida.idUnidad}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcionInput" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcionInput" rows="3" th:field="${servicio.descripcion}" placeholder="Breve reseña del servicio"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="precioInput" class="form-label">Precio</label>
+                        <input type="text" class="form-control" id="precioInput" th:field="${servicio.precio}" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Grabar</button>
+                </div>    
+            </form>
+        </div>
+    </div>
+</div>

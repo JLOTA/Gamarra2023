@@ -20,6 +20,10 @@ public class ClienteService {
         return clienteRepository.findAll();
     }
     
+    public List<Cliente> buscarClientesPorDocumento(String documento) {
+        return clienteRepository.findAllByDocumentoContaining(documento);
+    }
+    
     public Cliente buscarPorDocumento(String documento){
         return clienteRepository.findByDocumento(documento);
     }

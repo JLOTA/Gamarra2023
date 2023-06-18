@@ -42,6 +42,11 @@ public class ServicioService {
     }
     
     public Servicio buscarPorCategoriaYSubcategoria(Categoria categoria, Subcategoria subcategoria){
+        
         return servicioRepository.findByCategoriaAndSubcategoria(categoria, subcategoria);
+    }
+    
+    public List<Servicio> buscarPorAbrevitura(String abreviatura){
+        return servicioRepository.findAllByAbreviaturaContaining(abreviatura);
     }
 }

@@ -4,8 +4,8 @@ import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Service.*;
 import com.Gamarra.app.Utils.*;
 import java.security.Principal;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RequiredArgsConstructor
 @Controller
@@ -24,10 +25,8 @@ public class VentaControl {
     private final VentaService ventaService;
 
     @GetMapping("/")
-    public String mostrarVentas(Model model, Principal principal) {
+    public String mostrarVentas(Model model, Principal principal, @PageableDefault(size = 10) Pageable pageable) {
         if (authUtils.usuarioLogeado(model, principal)) {
-            List<Venta> ventas = ventaService.listarVentas();
-            model.addAttribute("ventas", ventas);
             return "ventas";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
@@ -80,6 +79,7 @@ public class VentaControl {
             model.addAttribute("ventasDiarias", ventaService.obtenerVentasDiarias());
             model.addAttribute("ventasSemanales", ventaService.obtenerVentasSemanales());
             model.addAttribute("ventasMensuales", ventaService.obtenerVentasMensuales());
+            model.addAttribute("serviciosDelMes", ventaService.obtenerServiciosMasVendidosDelMes());
 
             return "ventasreport";
         } else {
@@ -102,5 +102,39 @@ public class VentaControl {
             model.addAttribute("errorMessage", "Usuario no encontrado");
             return "redirect:/login";
         }
+    }
+    
+    @GetMapping("/buscar")
+    public String buscarVentas(@RequestParam("correlativo") String correlativo, Model model, @PageableDefault(size = 10) Pageable pageable) {
+        Page<Venta> ventasPage = ventaService.buscarPorCorrelativo(pageable, correlativo);
+        if (ventasPage != null && ventasPage.hasContent()) {
+            model.addAttribute("ventas", ventasPage.getContent());
+            model.addAttribute("currentPage", ventasPage.getNumber());
+            model.addAttribute("totalPages", ventasPage.getTotalPages());
+
+            String url = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .replaceQueryParam("page", "{page}")
+                    .buildAndExpand("{page}")
+                    .toUriString();
+            model.addAttribute("url", url);
+        }
+        return "fragmentos/tablas :: tablaVenta";
+    }
+    
+    @GetMapping("/listar")
+    public String listarVentas(Model model, @PageableDefault(size = 10) Pageable pageable) {
+        Page<Venta> ventasPage = ventaService.obtenerVentasPaginados(pageable);
+            if (ventasPage != null && ventasPage.hasContent()) {
+                model.addAttribute("ventas", ventasPage.getContent());
+                model.addAttribute("currentPage", ventasPage.getNumber());
+                model.addAttribute("totalPages", ventasPage.getTotalPages());
+
+                String url = ServletUriComponentsBuilder.fromCurrentRequest()
+                        .replaceQueryParam("page", "{page}")
+                        .buildAndExpand("{page}")
+                        .toUriString();
+                model.addAttribute("url", url);
+            }
+        return "fragmentos/tablas :: tablaVenta";
     }
 }

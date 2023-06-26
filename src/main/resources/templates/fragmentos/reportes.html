@@ -1,0 +1,159 @@
+<div class="container mt-3" id="mesAnioTabla" th:fragment="mesAnioTabla">
+    <div class="row">
+        <div class="justify-content-center">
+            <button class="btn btn-danger float-end" type="button" onclick="exportarPdf()"><i class="fa-solid fa-file-pdf"></i> Exportar a PDF</button>
+            <button class="btn btn-success float-end" type="button" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> Exportar a Excel</button>
+        </div>
+    </div>
+    <div class="row small mt-3">
+        <div class="col-md-8" id="resumen">
+            <h3>Resumen de periodo <span th:text="${titulo}"></span></h3>
+            <div class="row d-flex mt-3">
+                <div class="col">
+                    <span><strong>Cantidad de ventas: </strong></span><span th:text="${detalle.cantidad}"></span>
+                </div>
+                <div class="col">
+                    <span><strong>Monto Total: </strong>S/</span><span th:text="${detalle.gananciaTotal}"></span>
+                </div>
+                <div class="col">
+                    <span><strong>Monto Promedio: </strong>S/</span><span th:text="${detalle.gananciaPromedio}"></span>
+                </div>
+            </div>
+            <table class="table table-responsive-md mt-3">
+                <thead>
+                    <tr>
+                        <th>Correlativo</th>
+                        <th>Cliente</th>
+                        <th>Monto</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="venta : ${detalle.entidad}">
+                        <td th:text="${venta.correlativo}"></td>
+                        <td th:text="${venta.pedido.cliente.nombre}"></td>
+                        <td>S/ <span th:text="${venta.total}"></span></td>
+                        <td th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy')}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-6 col-md-4 text-center">
+            <div id="detalleCliente">
+                <h5 class="text-start">Ventas por Cliente:</h5>
+                <table class="table table-responsive-md">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Cantidad</th>
+                            <th>Monto Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cliente : ${clientes}">
+                            <td class="text-nowrap">
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" th:attr="data-bs-content=${cliente.entidad.nombre}">
+                                    <button class="btn btn-sm btn-info" type="button" disabled th:text="${cliente.entidad.documento}"></button>
+                                </span>
+                            </td>
+                            <td th:text="${cliente.cantidad}"></td>
+                            <td>S/<span th:text="${cliente.gananciaTotal}"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="detalleEmpleado">
+                <h5 class="text-start">Ventas por Empleado:</h5>
+                <table class="table table-responsive-md">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Cantidad</th>
+                            <th>Monto Total</th>
+                            <th>Monto Promedio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="empleado : ${empleados}">
+                            <td class="text-nowrap">
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" th:data-bs-content="${empleado.entidad.nombre}+' '+${empleado.entidad.apellido}">
+                                    <button class="btn btn-sm btn-info" type="button" disabled th:text="${empleado.entidad.dni}"></button>
+                                </span>
+                            </td>
+                            <td th:text="${empleado.cantidad}"></td>
+                            <td>S/<span th:text="${empleado.gananciaTotal}"></span></td>
+                            <td>S/<span th:text="${empleado.gananciaPromedio}"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="detalleServicio">
+                <h5 class="text-start">Ventas por Servicio:</h5>
+                <table class="table table-responsive-md">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="servicio : ${servicios}">
+                            <td class="text-nowrap" th:text="${servicio.entidad.abreviatura}"></td>
+                            <td th:text="${servicio.cantidad}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            $('[data-bs-toggle="popover"]').popover();
+        });
+    </script>
+
+    <script th:inline="javascript">
+        var pruebaJson = /*[[${serviciosJson}]]*/ null;
+        var reporte = JSON.parse(pruebaJson);
+        console.log(reporte);
+        function exportarPdf() {
+            var ventasJson = /*[[${detalle.entidadJson}]]*/ null;
+            var ventas = JSON.parse(ventasJson);
+            // Crear un nuevo documento PDF
+            var doc = new jsPDF();
+
+            // Definir las columnas de la tabla
+            var columns = [
+                {title: 'Correlativo de Venta', dataKey: 'correlativoVenta'},
+                {title: 'Correlativo de Pedido', dataKey: 'correlativoPedido'},
+                {title: 'Cliente', dataKey: 'cliente'},
+                {title: 'Empleado', dataKey: 'empleado'},
+                {title: 'Usuario', dataKey: 'usuario'},
+                {title: 'Monto Total Pagado', dataKey: 'montoTotal'}
+            ];
+
+            // Definir los datos de la tabla
+            var data = [];
+
+            // Recorrer cada venta en el arreglo y agregar los datos a la tabla
+            ventas.forEach(function (venta) {
+                var rowData = {
+                    correlativoVenta: venta.correlativo,
+                    correlativoPedido: venta.pedido.correlativo,
+                    cliente: venta.pedido.cliente.nombre,
+                    empleado: venta.pedido.empleado.apellido,
+                    usuario: venta.usuario.usuario,
+                    montoTotal: venta.total.toString()
+                };
+
+                data.push(rowData);
+            });
+
+            // Agregar la tabla al documento PDF
+            doc.autoTable(columns, data);
+
+            // Guardar el documento PDF
+            doc.save('informe_ventas.pdf');
+        }
+    </script>
+</div>

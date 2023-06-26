@@ -22,8 +22,8 @@
                 </td>
                 <td th:text="${#temporals.format(pedido.fecha, 'dd-MM-yyyy')}"></td>
                 <td>
-                    <a class="btn btn-secondary me-2" th:href="@{/pedidos/ver(id=${pedido.idPedido})}"><i class="fa-solid fa-eye"></i></a>
-                    <a class="btn btn-primary" th:href="@{/ventas/generar(id=${pedido.idPedido})}" th:classappend="${pedido.estado.idEstado == 3 ? 'disabled' : ''}"><i class="fa-solid fa-forward-step"></i></a>
+                    <a class="btn btn-secondary me-2" th:onclick="'verPedido(' + ${pedido.idPedido} + ')'"><i class="fa-solid fa-eye"></i></a>
+                    <a class="btn btn-primary" th:onclick="'generarVenta(' + ${pedido.idPedido} + ')'" th:classappend="${pedido.estado.idEstado == 3 ? 'disabled' : ''}"><i class="fa-solid fa-forward-step"></i></a>
                 </td>
             </tr>
         </tbody>
@@ -32,16 +32,15 @@
     <nav>
         <ul class="pagination">
             <li class="page-item" th:unless="${currentPage == 0}">
-                <a class="page-link" th:href="@{${url}(page=${currentPage - 1})}" aria-label="Previous">
+                <a class="page-link" th:onclick="'paginaPedidos(' + ${currentPage - 1} + ')'" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
-                th:class="${pageNumber == currentPage} ? 'active'">
-                <a class="page-link" th:href="@{${url}(page=${pageNumber})}" th:text="${pageNumber + 1}"></a>
+            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${pageNumber == currentPage} ? 'active'">
+                <a class="page-link" th:onclick="'paginaPedidos(' + ${pageNumber} + ')'" th:text="${pageNumber + 1}"></a>
             </li>
             <li class="page-item" th:unless="${currentPage == totalPages - 1}">
-                <a class="page-link" th:href="@{${url}(page=${currentPage + 1})}" aria-label="Next">
+                <a class="page-link" th:onclick="'paginaPedidos(' + ${currentPage + 1} + ')'" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -71,7 +70,7 @@
                 <td>S/ <span th:text="${venta.descuento}"></span></td>
                 <td>S/ <span th:text="${venta.total}"></span></td>
                 <td>
-                    <a class="btn btn-secondary me-2" th:href="@{/ventas/ver(id=${venta.idVenta})}"><i class="fa-solid fa-eye"></i></a>
+                    <a class="btn btn-secondary me-2" th:onclick="'verVenta(' + ${venta.idVenta} + ')'"><i class="fa-solid fa-eye"></i></a>
                 </td>
             </tr>
         </tbody>
@@ -79,16 +78,15 @@
     <nav>
         <ul class="pagination">
             <li class="page-item" th:unless="${currentPage == 0}">
-                <a class="page-link" th:href="@{${url}(page=${currentPage - 1})}" aria-label="Previous">
+                <a class="page-link" th:onclick="'paginaVentas(' + ${currentPage - 1} + ')'" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}"
-                th:class="${pageNumber == currentPage} ? 'active'">
-                <a class="page-link" th:href="@{${url}(page=${pageNumber})}" th:text="${pageNumber + 1}"></a>
+            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${pageNumber == currentPage} ? 'active'">
+                <a class="page-link" th:onclick="'paginaVentas(' + ${pageNumber} + ')'" th:text="${pageNumber + 1}"></a>
             </li>
             <li class="page-item" th:unless="${currentPage == totalPages - 1}">
-                <a class="page-link" th:href="@{${url}(page=${currentPage + 1})}" aria-label="Next">
+                <a class="page-link" th:onclick="'paginaVentas(' + ${currentPage + 1} + ')'" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -117,6 +115,7 @@
                 <td th:text="${empleado.correo}"></td>
                 <td>
                     <a class="btn btn-warning me-2" th:onclick="'formEmpleado(' + ${empleado.idEmpleado} + ')'"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <a class="btn btn-info me-2" th:onclick="'asignarUsuario(' + ${empleado.idEmpleado} + ')'"><i class="fa-solid fa-user-plus"></i></a>
                     <a class="btn btn-danger" th:href="@{/empleados/borrar(id=${empleado.idEmpleado})}"><i class="fa-solid fa-trash"></i></a>
                 </td>
             </tr>

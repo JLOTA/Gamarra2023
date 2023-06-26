@@ -21,12 +21,18 @@ import org.springframework.stereotype.Controller;
 public class Control {
 
     private final UsuarioService usuarioService;
+    private final VentaService ventaService;
     private final AuthUtils authUtils;
     private final UserDetailsService userDetailsService;
 
     @GetMapping("/home")
     public String showHomePage(Model model, Principal principal) {
         if (authUtils.usuarioLogeado(model, principal)) {
+
+            model.addAttribute("ventasDiarias", ventaService.obtenerVentasDiarias());
+            model.addAttribute("ventasSemanales", ventaService.obtenerVentasSemanales());
+            model.addAttribute("ventasMensuales", ventaService.obtenerVentasMensuales());
+            model.addAttribute("serviciosDelMes", ventaService.obtenerServiciosMasVendidosDelMes());
 
             return "home";
         } else {

@@ -11,12 +11,13 @@
     <body>
         <div th:replace="~{navbar.html}"></div>
         <div class="container">
-            <h1 class="mt-3">Listado de Clientes</h1>
-
+            <h2 class="mt-3">Listado de Clientes</h2>
             <div class="row mt-3">
                 <div class="col-md-6 d-flex">
-                    <input class="form-control" type="search" placeholder="Buscar por documento" aria-label="Buscar" id="documentoInput">
-                    <button class="btn btn-primary" type="button" onclick="buscarCliente()"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Buscar por documento" aria-label="Buscar" id="documentoInput">
+                        <button class="btn btn-primary" type="button" onclick="buscarCliente()"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
                 </div>
                 <div class="col-md-6 d-flex justify-content-md-end justify-content-center mt-3 mt-md-0">
                     <a class="btn btn-success" onclick="formCliente()" role="button">

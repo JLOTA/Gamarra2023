@@ -1,0 +1,336 @@
+<div th:fragment="modalPedidoVista" class="modal modal-xl fade" id="pedidoVistaModal" tabindex="-1" aria-labelledby="pedidoVistaModal" aria-hidden="true">
+    <div class="modal-dialog small">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel">Solicitud de Pedido</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row justify-content-around">
+                    <div class="col-md-4">
+                        <h4>Información del Cliente</h4>
+                        <div class="row"></div>
+                        <p><strong>Nombre:</strong> <span th:text="${pedido.cliente.nombre}"></span></p>
+                        <div class="row"></div>
+                        <p><strong>Dirección:</strong> <span th:text="${pedido.cliente.direccion}"></span></p>
+                        <div class="row"></div>
+                        <p><strong>Teléfono:</strong> <span th:text="${pedido.cliente.telefono}"></span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Información del Pedido</h4>
+                        <p><strong>N° de Pedido:</strong> <span th:text="${pedido.correlativo}"></span></p>
+                        <p><strong>Fecha:</strong> <span th:text="${#temporals.format(pedido.fecha, 'dd-MM-yyyy')}"></span></p>
+                        <p><strong>Subtotal:</strong> S/ <span id="subtotal" th:text="${pedido.subtotal}"></span></p>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th>Servicio</th>
+                                    <th>Observación</th>
+                                    <th>Precio</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="detalle, rowStat:${detalles}">
+                                    <th scope="row" th:text="${rowStat.count}"></th>
+                                    <td th:text="${detalle.servicio.abreviatura}"></td>
+                                    <td th:text="${detalle.observacion}"></td>
+                                    <td>S/ <span th:text="${detalle.servicio.precio}"></span></td>
+                                    <td th:text="${detalle.cantidad}"></td>
+                                    <td>S/ <span th:text="${detalle.totalUnitario}"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                    <div class="col-12 text-end">
+                        <p><strong>Monto estimado a pagar:</strong> S/ <span id="subtotal" th:text="${pedido.subtotal}"></span></p>
+                    </div>
+                </div>        
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+            </div>    
+        </div>
+    </div>
+</div>
+
+<div th:fragment="modalVentaVista" class="modal modal-xl fade" id="ventaVistaModal" tabindex="-1" aria-labelledby="ventaVistaModal" aria-hidden="true">
+    <div class="modal-dialog small">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel">Comprobante de Pago - <span th:text="${venta.tipoVenta.nombre}"></span></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row justify-content-around">
+                    <div class="col-md-4">
+                        <h5>Información del Cliente</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Nombre:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.pedido.cliente.nombre}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Documento:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.pedido.cliente.documento}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Dirección:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.pedido.cliente.direccion}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Información de Pago</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Comprobante:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.correlativo}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Fecha:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy')}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Subtotal:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p> S/ <span id="subtotal" th:text="${venta.pedido.subtotal}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th>Servicio</th>
+                                    <th>Observación</th>
+                                    <th>Precio</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="detalle, rowStat:${detalles}">
+                                    <th scope="row" th:text="${rowStat.count}"></th>
+                                    <td th:text="${detalle.servicio.abreviatura}"></td>
+                                    <td th:text="${detalle.observacion}"></td>
+                                    <td>S/ <span th:text="${detalle.servicio.precio}"></span></td>
+                                    <td th:text="${detalle.cantidad}"></td>
+                                    <td>S/ <span th:text="${detalle.totalUnitario}"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-12 text-end">
+                        <p><strong>Subtotal:</strong> S/ <span id="subtotal" th:text="${venta.pedido.subtotal}"></span></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-end">
+                        <p><strong>Descuento:</strong> S/ <span id="descuento" th:text="${venta.descuento}"></span></p>
+                    </div>
+                </div>  
+                <div class="row">
+                    <div class="col-12 text-end">
+                        <p><strong>Total:</strong> S/ <span id="total" th:text="${venta.total}"></span></p>
+                    </div>
+                </div>      
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+            </div>    
+        </div>
+    </div>
+</div>
+
+<div th:fragment="modalVentaGenerar" class="modal modal-xl fade" id="ventaGenerarModal" tabindex="-1" aria-labelledby="ventaGenerarModal" aria-hidden="true">
+    <div class="modal-dialog small">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel">Comprobante de Pago</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row justify-content-around">
+                    <div class="col-md-4">
+                        <h5>Información del Cliente</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Nombre:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.pedido.cliente.nombre}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Documento:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.pedido.cliente.documento}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Dirección:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.pedido.cliente.direccion}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Información de la Venta</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Comprobante:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${venta.correlativo}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Fecha:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p th:text="${#temporals.format(venta.fecha, 'dd-MM-yyyy')}"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Subtotal:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <p> S/ <span id="subtotal" th:text="${venta.pedido.subtotal}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Información de Pago</h5>
+                        <form method="post" th:action="@{/ventas/grabar}" id="form-venta">
+                            <div class="row d-flex align-items-center">
+                                <div class="col-md-3"><p><strong>Descuento (S/):</strong></p></div>
+                                <div class="col-md-6"><input class="form-control form-control-sm" type="text" name="descuento" value=""></div>
+                                <div class="col"><button class="btn btn-info" type="button" onclick="calcularTotal()"><i class="fa-solid fa-calculator"></i></button></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3"><p><strong>IGV (18%):</strong></p></div>
+                                <div class="col-md-6"><input class="form-control form-control-sm" type="text" name="igv" value="0.00" disabled></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3"><p><strong>Total (S/):</strong></p></div>
+                                <div class="col-md-6"><input class="form-control form-control-sm" type="text" name="total" value="0.00" disabled></div>
+                            </div>
+                            <div class="row d-flex align-items-center">
+                                <div class="col-md-3 form-check form-switch">
+                                    <input class="form-check-input" name="idTipo" value="2" type="checkbox" role="switch" id="factura" onclick="cambiarTextoLabel()">
+                                    <label class="form-check-label" for="factura">Boleta</label>
+                                </div>
+                                <div class="col-md-6 d-grid">
+                                    <button class="btn btn-primary" type="submit" form="form-venta">Generar <i class="fa-solid fa-forward-step"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th>Servicio</th>
+                                    <th>Observación</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Cantidad</th>
+                                    <th>Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="detalle, rowStat:${detalles}">
+                                    <th scope="row" th:text="${rowStat.count}"></th>
+                                    <td th:text="${detalle.servicio.abreviatura}"></td>
+                                    <td th:text="${detalle.observacion}"></td>
+                                    <td>S/ <span th:text="${detalle.servicio.precio}"></span></td>
+                                    <td th:text="${detalle.cantidad}"></td>
+                                    <td>S/ <span th:text="${detalle.totalUnitario}"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-12 text-end">
+                        <p><strong>Subtotal:</strong> S/ <span id="subtotal" th:text="${venta.pedido.subtotal}"></span></p>
+                    </div>
+                </div>    
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+            </div>    
+        </div>
+    </div>
+    <script>
+        var subtotal = document.getElementById('subtotal').textContent;
+        var descuento = document.querySelector('input[name="descuento"]');
+        var igv = document.querySelector('input[name="igv"]');
+        var total = document.querySelector('input[name="total"]');
+        var facturaRadio = document.getElementById('factura');
+
+        function calcularTotal() {
+            if (facturaRadio.checked) {
+                igv.value = ((subtotal - descuento.value) * 0.18).toFixed(2);
+                total.value = ((subtotal - descuento.value) * 1.18).toFixed(2);
+            } else {
+                igv.value = 0.00;
+                total.value = (subtotal - descuento.value).toFixed(2);
+            }
+        }
+
+        function cambiarTextoLabel() {
+            var checkbox = document.getElementById("factura");
+            var label = document.querySelector("label[for='factura']");
+
+            if (checkbox.checked) {
+                label.textContent = "Factura";
+            } else {
+                label.textContent = "Boleta";
+            }
+        }
+    </script>
+</div>

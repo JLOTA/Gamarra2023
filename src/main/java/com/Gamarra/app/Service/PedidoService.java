@@ -58,13 +58,23 @@ public class PedidoService {
         return pedido;
     }
 
-    public void agregarServicio(int id, double cantidad, String observacion) {
+    public String agregarServicio(int id, double cantidad, String observacion) {
+        String msg="";
         Servicio servicio = servicioService.buscarServicioPorId(id);
-        dtoPedido.agregar(servicio, cantidad, observacion);
+        List<DtoDetallePedido> pedidosAgregados = this.verCarrito();
+        boolean existeDetalle = pedidosAgregados.stream().anyMatch(dtoDetalle
+                        -> dtoDetalle.getServicio().getIdServicio()==id && dtoDetalle.getObservacion().equals(observacion));
+        if (!existeDetalle) {
+            dtoPedido.agregar(servicio, cantidad, observacion);
+            msg= "El servicio se agrego con exito";
+        } else {
+            msg= "El servicio y detalle ya estan seleccionados";
+        }
+        return msg;
     }
 
-    public void quitarServicio(int id) {
-        dtoPedido.quitar(id);
+    public void quitarServicio(int idServicio, String observacion) {
+        dtoPedido.quitar(idServicio, observacion);
     }
 
     public List<DtoDetallePedido> verCarrito() {
@@ -212,7 +222,7 @@ public class PedidoService {
     public Pedido buscarPorId(int id) {
         return pedidoRepository.findById(id).orElse(null);
     }
-    
+
     public Page<Pedido> buscarPorCorrelativo(Pageable pageable, String correlativo) {
         return pedidoRepository.findAllByCorrelativoContainingOrderByFechaDesc(correlativo, pageable);
     }

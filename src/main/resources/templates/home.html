@@ -6,12 +6,198 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
         <script src="https://kit.fontawesome.com/9d72cb34f3.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </head>
     <body>
         <div th:replace="~{navbar.html}"></div>
-        <h1>Estas en home</h1>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KJ3o2DKtI5qhOi6Sp5kndJ68IuBBf6pI7KxJ78v6vsvG6+FrC1KoS4C0a6pJ+rZd" crossorigin="anonymous"></script>
+        <div class="container text-center small mt-3">
+            <h2 class="text-start mt-3">Bienvenido</h2>
+            <div class="row gx-5 mt-3">
+                <div class="col">
+                    <h5>Ventas de los últimos días</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>N° de ventas</th>
+                                <th>Total de ganancias</th>
+                                <th>Promedio de Ganancias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ventaDiaria : ${ventasDiarias}">
+                                <td class="text-nowrap" th:text="${ventaDiaria.key}"></td>
+                                <td th:text="${ventaDiaria.value.cantidad}"></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(ventaDiaria.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(ventaDiaria.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <canvas id="chartVentasDiarias"></canvas>
+                </div>
+            </div>
+
+            <div class="row gx-5 mt-3">
+                <div class="col">
+                    <h5>Ventas de las últimas semanas</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>N° de ventas</th>
+                                <th>Total de ganancias</th>
+                                <th>Promedio de Ganancias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ventaSemanal : ${ventasSemanales}">
+                                <td th:text="${ventaSemanal.key}"></td>
+                                <td th:text="${ventaSemanal.value.cantidad}"></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(ventaSemanal.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(ventaSemanal.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <canvas id="chartVentasSemanales"></canvas>
+                </div>
+            </div>
+
+            <div class="row gx-5 mt-3">
+                <div class="col">
+                    <h5>Ventas Mensuales</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>N° de ventas</th>
+                                <th>Total de ganancias</th>
+                                <th>Promedio de Ganancias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ventaMensual : ${ventasMensuales}">
+                                <td th:text="${ventaMensual.key}"></td>
+                                <td th:text="${ventaMensual.value.cantidad}"></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(ventaMensual.value.gananciasTotales, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                <td>S/ <span th:text="${#numbers.formatDecimal(ventaMensual.value.promedioGanancias, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <canvas id="chartVentasMensuales"></canvas>
+                </div>
+            </div>
+            <canvas id="chartServiciosMes"></canvas>
+        </div>
+        <script th:inline="javascript">
+            var serviciosDelMes = /*[[${serviciosDelMes}]]*/ {};
+            var serviciosDelMesJson = JSON.parse(serviciosDelMes);
+            var labels = Object.keys(serviciosDelMesJson);
+            var data = Object.values(serviciosDelMesJson);
+            // Crear el gráfico de tipo pie
+            var ctx = document.getElementById('chartServiciosMes').getContext('2d');
+            var ventasSemanalesChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                            data: data,
+                            label: 'Cantidad: ',
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)',
+                                'rgba(255, 159, 64, 0.7)'
+                            ],
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Servicios más vendidos del mes'
+                        }
+                    }
+                },
+            });
+
+            var ventasDiarias = /*[[${ventasDiarias}]]*/ {};
+            var ventasSemanales = /*[[${ventasSemanales}]]*/ {};
+            var ventasMensuales = /*[[${ventasMensuales}]]*/ {};
+
+            // Crear el gráfico de pedidos diarios
+            var ctxVentasDiarias = document.getElementById('chartVentasDiarias').getContext('2d');
+            new Chart(ctxVentasDiarias, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(ventasDiarias),
+                    datasets: [{
+                            label: 'Número de ventas',
+                            data: Object.values(ventasDiarias).map(entry => entry.cantidad),
+                            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            borderWidth: 2
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Crear el gráfico de pedidos semanales
+            var ctxVentasSemanales = document.getElementById('chartVentasSemanales').getContext('2d');
+            new Chart(ctxVentasSemanales, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(ventasSemanales),
+                    datasets: [{
+                            label: 'Número de ventas',
+                            data: Object.values(ventasSemanales).map(entry => entry.cantidad),
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Crear el gráfico de pedidos mensuales
+            var ctxVentasMensuales = document.getElementById('chartVentasMensuales').getContext('2d');
+            new Chart(ctxVentasMensuales, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(ventasMensuales),
+                    datasets: [{
+                            label: 'Número de ventas',
+                            data: Object.values(ventasMensuales).map(entry => entry.cantidad),
+                            backgroundColor: 'rgba(99, 255, 133, 0.5)',
+                            borderColor: 'rgba(99, 255, 200, 1)',
+                            borderWidth: 2
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
     </body>
 </html>

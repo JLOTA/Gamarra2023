@@ -39,6 +39,47 @@
         </div>
     </div>
 </div>
+
+<!-- modal empleado -->
+<div th:fragment="modalAsignarUsuario" class="modal fade" id="modalAsignarUsuario" tabindex="-1" aria-labelledby="modalAsignarUsuario" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel">Asignar Usuario</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:object="${user}" th:action="@{/empleados/grabar-usuario}" method="post">
+                <div class="modal-body">
+                    <p th:text="${empleado.nombre}"></p>
+                    <p th:text="${empleado.apellido}"></p>
+                    <p th:text="${empleado.dni}"></p>
+                    <input type="hidden" id="idUsuario" th:field="*{idUsuario}">
+                    <input type="hidden" id="idEmpleado" th:field="*{empleado}" th:value="${user.empleado}">
+                    <div class="mb-3">
+                        <label for="perfil" class="form-label">Perfil</label>
+                        <select class="form-select" id="perfil" th:field="*{perfil}">
+                            <option th:each="perfil : ${perfiles}"
+                                    th:value="${perfil.idPerfil}"
+                                    th:text="${perfil.nombre}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="usuario" class="form-label">Usuario</label>
+                        <input type="text" class="form-control" id="usuario" th:field="*{usuario}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clave" class="form-label">Contraseña</label>
+                        <input type="text" class="form-control" id="clave" th:field="*{clave}" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Grabar</button>
+                </div>    
+            </form>
+        </div>
+    </div>
+</div>
 <!-- modal cliente -->
 <div th:fragment="modalCliente" class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModal" aria-hidden="true">
     <div class="modal-dialog">

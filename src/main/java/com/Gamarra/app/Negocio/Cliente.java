@@ -1,9 +1,14 @@
 package com.Gamarra.app.Negocio;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.*;
 
-@NoArgsConstructor @Getter @Setter @ToString
+@NoArgsConstructor
+@Getter
+@Setter
 
 @Entity
 @Table(name = "cliente")
@@ -16,7 +21,9 @@ public class Cliente {
 
     @ManyToOne
     @JoinColumn(name = "IdClase")
+    @JsonManagedReference
     private ClaseCliente claseCliente;
+
     @Column(nullable = false, unique = true)
     private String documento;
     @Column(nullable = false)
@@ -25,5 +32,21 @@ public class Cliente {
     private String telefono;
     @Column(nullable = false)
     private String direccion;
+
+    @OneToMany(mappedBy = "cliente")
+    @JsonBackReference
+    private List<Pedido> pedidos;
+
+    @Override
+    public String toString() {
+        return "{"
+                + "\"idCliente\":" + idCliente
+                + ", \"claseCliente\":" + (claseCliente != null ? claseCliente.toString() : "null")
+                + ", \"documento\":\"" + documento + "\""
+                + ", \"nombre\":\"" + nombre + "\""
+                + ", \"telefono\":\"" + telefono + "\""
+                + ", \"direccion\":\"" + direccion + "\""
+                + "}";
+    }
 
 }

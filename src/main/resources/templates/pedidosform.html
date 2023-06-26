@@ -7,67 +7,41 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
         <script src="https://kit.fontawesome.com/9d72cb34f3.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </head>
 
     <body>
         <div th:replace="~{navbar.html}"></div>
         <div class="container">
-            <h3 class="mt-3">Formulario de Pedido</h3>
+            <h2 class="mt-3">Formulario de Pedido</h2>
             <div class="row align-items-start">
                 <div class="col">
                     <!-- Sección Cliente -->
                     <fieldset class="border rounded p-3 mt-5">
                         <legend class="h5 float-none w-auto px-3">Datos del Cliente</legend>
-                        <form method="post" th:action="@{/pedidos/cartc}">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control form-control-sm" name="documento"
-                                       th:value="${pedido.cliente.documento}" placeholder="Documento del cliente" required>
-                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
-                            </div>
-                        </form>
-
-                        <p th:text="${pedido.cliente.nombre}"></p>
-                        <p th:text="${pedido.cliente.direccion}"></p>
-                        <p th:text="${pedido.cliente.telefono}"></p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control form-control-sm" id="documentoInput" placeholder="Documento del cliente" required>
+                            <button type="button" onclick="buscarCliente()" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                        <div id="divPedidoCliente"></div>
                     </fieldset>
                 </div>
                 <div class="col">
                     <!-- Sección Empleado -->
                     <fieldset class="border rounded p-3 mt-5">
                         <legend class="h5 float-none w-auto px-3">Datos del Empleado</legend>
-                        <form method="post" th:action="@{/pedidos/carte}">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control form-control-sm" name="dni" th:value="${pedido.empleado.dni}"
-                                       placeholder="DNI del empleado" required>
-                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
-                            </div>
-                        </form>
-                        <p th:text="${pedido.empleado.nombre}"></p>
-                        <p th:text="${pedido.empleado.apellido}"></p>
-                        <p th:text="${pedido.empleado.telefono}"></p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control form-control-sm" id="dniInput" placeholder="DNI del empleado" required>
+                            <button type="button" onclick="buscarEmpleado()" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                        <div id="divPedidoEmpleado"></div>
                     </fieldset>
                 </div>
                 <div class="col">
                     <!-- Resumen del pedido -->
                     <fieldset class="border rounded p-3 mt-5">
                         <legend class="h5 float-none w-auto px-3">Resumen del pedido</legend>
-                        <table class="table table-sm table-responsive mt-3">
-                            <thead>
-                                <tr>
-                                    <td>Servicio</td>
-                                    <td>Cantidad</td>
-                                    <td>Total unitario</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        <tr th:each="detalle:${detalles}">
-                            <td th:text="${detalle.observacion}"></td>
-                            <td th:text="${detalle.cantidad}"></td>
-                            <td th:text="${detalle.totalUnitario}"></td>
-                        </tr>
-                        </tbody>
-                        </table>
-                        <p th:text="'Subtotal: S/ '+${pedido.subtotal}"></p>
+                        <div id="divPedidoDetalle" th:fragment="divPedidoDetalle">Lista vacia</div>
                         <a class="btn btn-primary btn-sm mt-3" th:href="@{/pedidos/resumen}">
                             <i class="fa-solid fa-clipboard-list mx-2"></i>Ver Resumen</a>
                     </fieldset>
@@ -81,52 +55,103 @@
                     <thead>
                         <tr>
                             <th>Servicio</th>
-                            <th>Precio</th>
                             <th>Cantidad</th>
                             <th>Observación</th>
-                            <th>Precio unitario</th>
-                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="detalle:${detalles}">
-                            <td th:text="${detalle.servicio.abreviatura}"></td>
-                            <td th:text="${detalle.servicio.precio}"></td>
-                            <td th:text="${detalle.cantidad}"></td>
-                            <td th:text="${detalle.observacion}"></td>
-                            <td th:text="${detalle.totalUnitario}"></td>
+                        <tr>
                             <td>
-                                <a th:href="@{/pedidos/cart/{id} (id=${detalle.servicio.idServicio})}"
-                                   class="btn btn-danger btn-sm"><i class="fa-solid fa-minus"></i></a>
+                                <select class="form-select form-select-sm" id="idServicio" name="idServicio" required>
+                                    <option value="" disabled selected>-- Seleccionar Servicio --</option>
+                                    <option th:each="servicio : ${servicios}" th:value="${servicio.idServicio}"
+                                            th:text="${servicio.categoria.nombre + ' ' + servicio.subcategoria.nombre + ' - S/ ' + servicio.precio}"></option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm" id="cantidad" name="cantidad" placeholder="Cantidad" required>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm" id="observacion" name="observacion" placeholder="Observación" required>
+                            </td>
+                            <td>
+                                <button type="button" onclick="agregarDetalle()" class="btn btn-info btn-sm"><i class="fa-solid fa-plus"></i></button>
                             </td>
                         </tr>
-                        <tr>
-                    <form method="post" th:action="@{/pedidos/cartd}">
-                        <td colspan="2">
-                            <select class="form-select form-select-sm" id="idServicio" name="idServicio" required>
-                                <option value="" disabled selected>-- Seleccionar Servicio --</option>
-                                <option th:each="servicio : ${servicios}" th:value="${servicio.idServicio}"
-                                        th:text="${servicio.categoria.nombre + ' ' + servicio.subcategoria.nombre + ' - ' + servicio.abreviatura}"></option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="text" class="form-control form-control-sm" id="cantidad" name="cantidad" placeholder="Cantidad" required>
-                        </td>
-                        <td colspan="2">
-                            <input type="text" class="form-control form-control-sm" id="observacion" name="observacion" placeholder="Observación" required>
-                        </td>
-                        <td>
-                            <button type="submit" class="btn btn-info btn-sm"><i class="fa-solid fa-plus"></i></button>
-                        </td>
-                    </form>
-                    </tr>
                     </tbody>
                 </table>
             </fieldset>
-
-
         </div>
 
+        <script th:inline="javascript">
+            function buscarCliente() {
+                var documento = document.getElementById("documentoInput").value;
+                $.ajax({
+                    url: "/pedidos/cartc",
+                    type: "GET",
+                    data: {documento: documento},
+                    success: function (response) {
+                        $("#divPedidoCliente").html(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error en la petición AJAX: " + error);
+                    }
+                });
+            }
+
+            function buscarEmpleado() {
+                var dni = document.getElementById("dniInput").value;
+                $.ajax({
+                    url: "/pedidos/carte",
+                    type: "GET",
+                    data: {dni: dni},
+                    success: function (response) {
+                        $("#divPedidoEmpleado").html(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error en la petición AJAX: " + error);
+                    }
+                });
+            }
+
+            function agregarDetalle() {
+                var idServicio = document.getElementById("idServicio").value;
+                var cantidad = document.getElementById("cantidad").value;
+                var observacion = document.getElementById("observacion").value;
+                if (!idServicio || !cantidad || !observacion) {
+                    alert("Por favor, complete todos los campos.");
+                    return;
+                }
+                $.ajax({
+                    url: "/pedidos/cartd",
+                    type: "GET",
+                    data: {idServicio: idServicio, cantidad: cantidad, observacion: observacion},
+                    success: function (response) {
+                        $("#divPedidoDetalle").html(response);
+                        $("#idServicio").val('');
+                        $("#cantidad").val('');
+                        $("#observacion").val('');
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error en la petición AJAX: " + error);
+                    }
+                });
+            }
+            
+            function quitarDetalle(idServicio, observacion) {
+                $.ajax({
+                    url: "/pedidos/cartq",
+                    type: "GET",
+                    data: {id: idServicio, observacion: observacion},
+                    success: function (response) {
+                        $("#divPedidoDetalle").html(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error en la petición AJAX: " + error);
+                    }
+                });
+            }
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
     </body>

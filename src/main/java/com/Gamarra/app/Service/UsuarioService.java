@@ -17,20 +17,25 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
-
-    public String guardarUsuario(Usuario usuario) {
-        if (usuario.getEmpleado() == null || usuario.getPerfil() == null) {
-            return "No se pudo guardar el usuario. Empleado o perfil no encontrados.";
+    
+    public boolean grabarUsuario(Usuario usuario) {
+        Usuario usuarioExistente = this.buscarPorUsuario(usuario.getUsuario());
+        if (usuarioExistente != null && (usuarioExistente.getIdUsuario()!= usuario.getIdUsuario())) {
+            return false;
         } else {
             String claveEncriptada = passwordEncoder.encode(usuario.getClave());
             usuario.setClave(claveEncriptada);
             usuarioRepository.save(usuario);
-            return "Usuario guardado: " + usuario;
+            return true;
         }
     }
 
     public Usuario buscarPorUsuario(String usuario) {
         return usuarioRepository.findByUsuario(usuario);
+    }
+    
+    public Usuario buscarPorEmpleado(Empleado empleado) {
+        return usuarioRepository.findByEmpleado(empleado);
     }
 
     public Usuario buscarPorId(int id) {

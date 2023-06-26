@@ -11,12 +11,13 @@
     <body>
         <div th:replace="~{navbar.html}"></div>
         <div class="container">
-            <h1 class="mt-3">Listado de Empleados</h1>
+            <h2 class="mt-3">Listado de Empleados</h2>
             <div class="row mt-3">
                 <div class="col-md-6 d-flex">
+                    <div class="input-group">
                         <input class="form-control" type="search" placeholder="Buscar por DNI" aria-label="Buscar" id="dniInput">
                         <button class="btn btn-primary" type="button" onclick="buscarEmpleado()"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    
+                    </div>
                 </div>
                 <div class="col-md-6 d-flex justify-content-md-end justify-content-center mt-3 mt-md-0">
                     <a class="btn btn-success float-end" onclick="formEmpleado()">
@@ -27,7 +28,8 @@
             </div>
         </div>
         <div class="modal fade" id="empleadoModal" tabindex="-1" aria-labelledby="empleadoModal" aria-hidden="true"></div>
-
+        <div class="modal fade" id="modalAsignarUsuario" tabindex="-1" aria-labelledby="modalAsignarUsuario" aria-hidden="true"></div>
+        
         <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
             <span th:text="${errorMessage}"></span>
         </div>
@@ -53,7 +55,6 @@
             }
             
             function formEmpleado(idEmpleado) {
-                console.log(idEmpleado);
                 $.ajax({
                     url: "/empleados/form",
                     type: "GET",
@@ -61,6 +62,21 @@
                     success: function (response) {
                         $("#empleadoModal").replaceWith(response);
                         $("#empleadoModal").modal("show");
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error en la petición AJAX: " + error);
+                    }
+                });
+            }
+            
+            function asignarUsuario(idEmpleado) {
+                $.ajax({
+                    url: "/empleados/asignar-usuario",
+                    type: "GET",
+                    data: {id: idEmpleado},
+                    success: function (response) {
+                        $("#modalAsignarUsuario").replaceWith(response);
+                        $("#modalAsignarUsuario").modal("show");
                     },
                     error: function (xhr, status, error) {
                         console.log("Error en la petición AJAX: " + error);

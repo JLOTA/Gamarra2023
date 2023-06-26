@@ -46,70 +46,45 @@ public class PedidoControl {
         }
     }
 
-    @PostMapping("/cartd")
+    @GetMapping("/cartd")
     public String cartPedidoDetalle(@RequestParam(value = "idServicio") int idServicio,
             @RequestParam(value = "cantidad") double cantidad,
             @RequestParam(value = "observacion") String observacion,
-            Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            pedidoService.agregarServicio(idServicio, cantidad, observacion);
-            model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", pedidoService.verCarrito());
-            model.addAttribute("pedido", pedidoService.verPedido());
+            Model model) {
+        model.addAttribute("msg", pedidoService.agregarServicio(idServicio, cantidad, observacion));
+        model.addAttribute("servicios", servicioService.listarServicios());
+        model.addAttribute("detalles", pedidoService.verCarrito());
+        model.addAttribute("pedido", pedidoService.verPedido());
 
-            return "pedidosform";
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
-        }
+        return "fragmentos/carrito :: divPedidoDetalle";
     }
 
-    @PostMapping("/carte")
-    public String cartPedidoEmpleado(@RequestParam(value = "dni") String dni,
-            Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            pedidoService.asignarEmpleado(dni);
-            model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", pedidoService.verCarrito());
-            model.addAttribute("pedido", pedidoService.verPedido());
-
-            return "pedidosform";
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
-        }
+    @GetMapping("/carte")
+    public String cartPedidoEmpleado(@RequestParam(value = "dni") String dni, Model model) {
+        pedidoService.asignarEmpleado(dni);
+        model.addAttribute("servicios", servicioService.listarServicios());
+        model.addAttribute("detalles", pedidoService.verCarrito());
+        model.addAttribute("pedido", pedidoService.verPedido());
+        return "fragmentos/carrito :: divPedidoEmpleado";
     }
 
-    @PostMapping("/cartc")
-    public String cartPedidoCliente(@RequestParam(value = "documento") String documento,
-            Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            pedidoService.asignarCliente(documento);
-            model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", pedidoService.verCarrito());
-            model.addAttribute("pedido", pedidoService.verPedido());
-
-            return "pedidosform";
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
-        }
+    @GetMapping("/cartc")
+    public String cartPedidoCliente(@RequestParam(value = "documento") String documento, Model model) {
+        pedidoService.asignarCliente(documento);
+        model.addAttribute("servicios", servicioService.listarServicios());
+        model.addAttribute("detalles", pedidoService.verCarrito());
+        model.addAttribute("pedido", pedidoService.verPedido());
+        return "fragmentos/carrito :: divPedidoCliente";
     }
 
-    @GetMapping("/cart/{id}")
-    public String quitarServicioCart(@PathVariable int id, Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            pedidoService.quitarServicio(id);
-
-            model.addAttribute("servicios", servicioService.listarServicios());
-            model.addAttribute("detalles", pedidoService.verCarrito());
-            model.addAttribute("pedido", pedidoService.verPedido());
-            return "pedidosform";
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
-        }
-
+    @GetMapping("/cartq")
+    public String quitarServicioCart(@RequestParam(value = "observacion") String observacion, 
+            @RequestParam(value = "id") Integer idServicio, Model model) {
+        pedidoService.quitarServicio(idServicio, observacion);
+        model.addAttribute("servicios", servicioService.listarServicios());
+        model.addAttribute("detalles", pedidoService.verCarrito());
+        model.addAttribute("pedido", pedidoService.verPedido());
+        return "fragmentos/carrito :: divPedidoDetalle";
     }
 
     @GetMapping("/grabar")
@@ -124,19 +99,11 @@ public class PedidoControl {
     }
 
     @GetMapping("/ver")
-    public String mostrarPedido(@RequestParam(value = "id") Pedido pedido, Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            if (pedido != null) {
-                model.addAttribute("pedido", pedido);
-                model.addAttribute("detalles", detalleService.listarDetallesPorPedido(pedido));
-                return "pedidosvista";
-            } else {
-                return "redirect:/pedidos/";
-            }
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
-        }
+    public String mostrarPedido(@RequestParam(value = "id") Integer idPedido, Model model) {
+        Pedido pedido = pedidoService.buscarPorId(idPedido);
+        model.addAttribute("pedido", pedido);
+        model.addAttribute("detalles", pedido.getDetalles());
+        return "fragmentos/vistas :: modalPedidoVista";
     }
 
     @GetMapping("/resumen")
@@ -182,23 +149,22 @@ public class PedidoControl {
         }
         return "fragmentos/tablas :: tablaPedido";
     }
-    
+
     @GetMapping("/listar")
     public String listarPedidos(Model model, @PageableDefault(size = 10) Pageable pageable) {
         Page<Pedido> pedidosPage = pedidoService.obtenerPedidosPaginados(pageable);
-            if (pedidosPage != null && pedidosPage.hasContent()) {
-                model.addAttribute("pedidos", pedidosPage.getContent());
-                model.addAttribute("currentPage", pedidosPage.getNumber());
-                model.addAttribute("totalPages", pedidosPage.getTotalPages());
+        if (pedidosPage != null && pedidosPage.hasContent()) {
+            model.addAttribute("pedidos", pedidosPage.getContent());
+            model.addAttribute("currentPage", pedidosPage.getNumber());
+            model.addAttribute("totalPages", pedidosPage.getTotalPages());
 
-                String url = ServletUriComponentsBuilder.fromCurrentRequest()
-                        .replaceQueryParam("page", "{page}")
-                        .buildAndExpand("{page}")
-                        .toUriString();
-                model.addAttribute("url", url);
-            }
+            String url = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .replaceQueryParam("page", "{page}")
+                    .buildAndExpand("{page}")
+                    .toUriString();
+            model.addAttribute("url", url);
+        }
         return "fragmentos/tablas :: tablaPedido";
     }
-    
 
 }

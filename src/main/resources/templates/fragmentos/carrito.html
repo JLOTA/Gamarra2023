@@ -1,0 +1,42 @@
+<div id="divPedidoCliente" th:fragment="divPedidoCliente">
+    <p th:text="${pedido.cliente.nombre}"></p>
+    <p th:text="${pedido.cliente.direccion}"></p>
+    <p th:text="${pedido.cliente.telefono}"></p>
+</div>
+
+<div id="divPedidoEmpleado" th:fragment="divPedidoEmpleado">
+    <p th:text="${pedido.empleado.nombre}"></p>
+    <p th:text="${pedido.empleado.apellido}"></p>
+    <p th:text="${pedido.empleado.telefono}"></p>
+</div>
+
+<div id="divPedidoDetalle" th:fragment="divPedidoDetalle">
+    <table class="table table-sm table-responsive mt-3">
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Observación</th>
+                <th>Precio unitario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="detalle:${detalles}">
+                <td th:text="${detalle.servicio.abreviatura}"></td>
+                <td th:text="${detalle.servicio.precio}"></td>
+                <td th:text="${detalle.cantidad}"></td>
+                <td th:text="${detalle.observacion}"></td>
+                <td th:text="${detalle.totalUnitario}"></td>
+                <td>
+                    <button th:attr="data-observacion=${detalle.observacion}, data-idServicio=${detalle.servicio.idServicio}" onclick="quitarDetalle(this.getAttribute('data-idServicio'), this.getAttribute('data-observacion'))" class="btn btn-danger btn-sm" type="button">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p th:text="'Subtotal: S/ '+${pedido.subtotal}"></p>
+</div>

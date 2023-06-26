@@ -4,16 +4,13 @@ import com.Gamarra.app.Negocio.*;
 import com.Gamarra.app.Service.*;
 import com.Gamarra.app.Utils.*;
 import java.security.Principal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RequiredArgsConstructor
@@ -22,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class VentaControl {
 
     private final AuthUtils authUtils;
+    private final PedidoService pedidoService;
     private final VentaService ventaService;
 
     @GetMapping("/")
@@ -35,24 +33,16 @@ public class VentaControl {
     }
 
     @GetMapping("/generar")
-    public String generarVenta(@RequestParam(value = "id") Pedido pedido, Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            if (pedido != null) {
-                ventaService.nuevaVenta(principal.getName(), pedido);
-                model.addAttribute("venta", ventaService.verVenta());
-                model.addAttribute("detalles", ventaService.verVenta().getPedido().getDetalles());
-                return "ventasgenerar";
-            } else {
-                return "redirect:/pedidos/";
-            }
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
-        }
+    public String generarVenta(@RequestParam(value = "id") Integer idPedido, Model model, Principal principal) {
+        Pedido pedido = pedidoService.buscarPorId(idPedido);
+        ventaService.nuevaVenta(principal.getName(), pedido);
+        model.addAttribute("venta", ventaService.verVenta());
+        model.addAttribute("detalles", ventaService.verVenta().getPedido().getDetalles());
+        return "fragmentos/vistas :: modalVentaGenerar";
     }
 
     @PostMapping("/grabar")
-    public String grabarPedido(@RequestParam(value = "idTipo", required = false) Integer idTipo,
+    public String grabarVenta(@RequestParam(value = "idTipo", required = false) Integer idTipo,
             @RequestParam(value = "descuento", required = false) Double descuento,
             Model model, Principal principal) {
         if (authUtils.usuarioLogeado(model, principal)) {
@@ -75,35 +65,21 @@ public class VentaControl {
     @GetMapping("/reporte")
     public String obtenerReportes(Model model, Principal principal, @PageableDefault(size = 10) Pageable pageable) {
         if (authUtils.usuarioLogeado(model, principal)) {
-
-            model.addAttribute("ventasDiarias", ventaService.obtenerVentasDiarias());
-            model.addAttribute("ventasSemanales", ventaService.obtenerVentasSemanales());
-            model.addAttribute("ventasMensuales", ventaService.obtenerVentasMensuales());
-            model.addAttribute("serviciosDelMes", ventaService.obtenerServiciosMasVendidosDelMes());
-
             return "ventasreport";
         } else {
             model.addAttribute("errorMessage", "Usuario no encontrado");
             return "redirect:/login";
         }
     }
-    
+
     @GetMapping("/ver")
-    public String mostrarVenta(@RequestParam(value = "id") Venta venta, Model model, Principal principal) {
-        if (authUtils.usuarioLogeado(model, principal)) {
-            if (venta != null) {
-                model.addAttribute("venta", venta);
-                model.addAttribute("detalles", venta.getPedido().getDetalles());
-                return "ventasvista";
-            } else {
-                return "redirect:/ventas/";
-            }
-        } else {
-            model.addAttribute("errorMessage", "Usuario no encontrado");
-            return "redirect:/login";
-        }
+    public String mostrarVenta(@RequestParam(value = "id") Integer idVenta, Model model, Principal principal) {
+        Venta venta = ventaService.buscarPorId(idVenta);
+        model.addAttribute("venta", venta);
+        model.addAttribute("detalles", venta.getPedido().getDetalles());
+        return "fragmentos/vistas :: modalVentaVista";
     }
-    
+
     @GetMapping("/buscar")
     public String buscarVentas(@RequestParam("correlativo") String correlativo, Model model, @PageableDefault(size = 10) Pageable pageable) {
         Page<Venta> ventasPage = ventaService.buscarPorCorrelativo(pageable, correlativo);
@@ -120,21 +96,41 @@ public class VentaControl {
         }
         return "fragmentos/tablas :: tablaVenta";
     }
-    
+
     @GetMapping("/listar")
     public String listarVentas(Model model, @PageableDefault(size = 10) Pageable pageable) {
         Page<Venta> ventasPage = ventaService.obtenerVentasPaginados(pageable);
-            if (ventasPage != null && ventasPage.hasContent()) {
-                model.addAttribute("ventas", ventasPage.getContent());
-                model.addAttribute("currentPage", ventasPage.getNumber());
-                model.addAttribute("totalPages", ventasPage.getTotalPages());
+        if (ventasPage != null && ventasPage.hasContent()) {
+            model.addAttribute("ventas", ventasPage.getContent());
+            model.addAttribute("currentPage", ventasPage.getNumber());
+            model.addAttribute("totalPages", ventasPage.getTotalPages());
 
-                String url = ServletUriComponentsBuilder.fromCurrentRequest()
-                        .replaceQueryParam("page", "{page}")
-                        .buildAndExpand("{page}")
-                        .toUriString();
-                model.addAttribute("url", url);
-            }
+            String url = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .replaceQueryParam("page", "{page}")
+                    .buildAndExpand("{page}")
+                    .toUriString();
+            model.addAttribute("url", url);
+        }
         return "fragmentos/tablas :: tablaVenta";
+    }
+
+    @GetMapping("/reporte/MA")
+    public String reportesPorMes(Model model, @RequestParam("monthYear") String fecha) {
+        List<Venta> filtro = ventaService.obtenerVentasPorMes(fecha);
+        model.addAttribute("ventas", filtro);
+        model.addAttribute("titulo", ventaService.obtenerPeriodo(fecha));
+        List<ReportesUtils> clientes=ventaService.reporteClienteDetalles(filtro);
+        List<ReportesUtils> empleados=ventaService.reporteEmpleadoDetalles(filtro);
+        List<ReportesUtils> servicios=ventaService.reporteServicioDetalles(filtro);
+        ReportesUtils detalles=ventaService.reporteVentasDetalles(filtro);
+        model.addAttribute("detalle", detalles);
+        model.addAttribute("detalleJson", detalles.toString());
+        model.addAttribute("clientes", clientes);
+        model.addAttribute("clientesJson", ventaService.reportesToJson(clientes));
+        model.addAttribute("empleados", empleados);
+        model.addAttribute("empleadosJson", ventaService.reportesToJson(empleados));
+        model.addAttribute("servicios", servicios);
+        model.addAttribute("serviciosJson", ventaService.reportesToJson(servicios));
+        return "fragmentos/reportes :: mesAnioTabla";
     }
 }

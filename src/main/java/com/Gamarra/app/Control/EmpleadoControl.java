@@ -1,18 +1,14 @@
 package com.Gamarra.app.Control;
 
-import com.Gamarra.app.Negocio.Empleado;
-import com.Gamarra.app.Service.EmpleadoService;
-import com.Gamarra.app.Utils.AuthUtils;
+import com.Gamarra.app.Negocio.*;
+import com.Gamarra.app.Service.*;
+import com.Gamarra.app.Utils.*;
 import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RequiredArgsConstructor
@@ -22,6 +18,8 @@ public class EmpleadoControl {
 
     private final AuthUtils authUtils;
     private final EmpleadoService empleadoService;
+    private final UsuarioService usuarioService;
+    private final PerfilService perfilService;
 
     @GetMapping("/")
     public String mostrarEmpleados(Model model, Principal principal) {
@@ -76,7 +74,36 @@ public class EmpleadoControl {
         model.addAttribute("empleado", empleado);
         return "fragmentos/modals :: modalEmpleado";
     }
+
+    @GetMapping("/asignar-usuario")
+    public String asignarUsuario(@RequestParam(value = "id", required = false) Integer idEmpleado, Model model) {
+        Empleado empleado = empleadoService.buscarEmpleadoPorId(idEmpleado);
+        Usuario usuario = usuarioService.buscarPorEmpleado(empleado);
+        String msg = "";
+        if (usuario != null) {
+            msg = "El empleado ya tiene un usuario asignado" + usuario.getUsuario();
+        } else {
+            usuario = new Usuario();
+            usuario.setEmpleado(empleado);
+            msg = "Nueva asignacion";
+        }
+        model.addAttribute("msg", msg);
+        model.addAttribute("perfiles", perfilService.listarPerfiles());
+        model.addAttribute("empleado", empleado);
+        model.addAttribute("user", usuario);
+        return "fragmentos/modals :: modalAsignarUsuario";
+    }
     
+    @PostMapping("/grabar-usuario")
+    public String grabarUsuario(@ModelAttribute("user") Usuario usuario, RedirectAttributes redirectAttributes) {
+        if (usuarioService.grabarUsuario(usuario)) {
+            redirectAttributes.addFlashAttribute("successMessage", "Usuario registrado exitosamente!!");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "El usuario ingresado ya está registrado");
+        }
+        return "redirect:/empleados/";
+    }
+
     @GetMapping("/buscar")
     public String buscarEmpleados(@RequestParam("dni") String dni, Model model) {
         List<Empleado> empleados = empleadoService.buscarEmpleadosPorDni(dni);
